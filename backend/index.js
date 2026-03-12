@@ -5,13 +5,17 @@ const cors = require('cors');
 const cropsRouter = require('./routes/crops');
 const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
+const aiRouter = require('./routes/ai');
+const rescueRouter = require('./routes/rescue');
+const chatRouter = require('./routes/chat');
+const otpRouter = require('./routes/otp');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -22,6 +26,10 @@ app.get('/api/health', (req, res) => {
 app.use('/api/crops', cropsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/api/ai', aiRouter);
+app.use('/api/rescue', rescueRouter);
+app.use('/api/chat', chatRouter);
+app.use('/api/otp', otpRouter);
 
 // 404 handler
 app.use((req, res) => {

@@ -8,6 +8,8 @@
     { "source": "/add-crop", "destination": "/add-crop.html" },
     { "source": "/order-management", "destination": "/order-management.html" },
     { "source": "/payment", "destination": "/payment.html" },
-    { "source": "/tracking", "destination": "/tracking.html" }
+    { "source": "/tracking", "destination": "/tracking.html" },
+    { "source": "/ai-predictor", "destination": "/ai-predictor.html" },
+    { "source": "/spoilage-rescue", "destination": "/spoilage-rescue.html" }
   ]
 }

@@ -71,6 +71,32 @@ router.post('/', async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // --- NEW: Stock Reduction Logic ---
+    if (crop_id) {
+      // 1. Get current crop details
+      const { data: crop } = await supabase
+        .from('crops')
+        .select('quantity_kg, is_available')
+        .eq('id', crop_id)
+        .single();
+      
+      if (crop) {
+        const newQty = Math.max(0, crop.quantity_kg - quantity_kg);
+        const isAvailable = newQty > 0;
+
+        // 2. Update crop stock and availability
+        await supabase
+          .from('crops')
+          .update({ 
+            quantity_kg: newQty, 
+            is_available: isAvailable 
+          })
+          .eq('id', crop_id);
+      }
+    }
+    // ----------------------------------
+
     res.status(201).json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

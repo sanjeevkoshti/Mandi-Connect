@@ -36,7 +36,7 @@
             <label class="form-label" for="crop-name">Crop Name *</label>
             <select id="crop-name" class="form-control" required>
               <option value="">Select crop type...</option>
-              <option>Wheat</option><option>Rice</option><option>Tomato</option>
+              <option>Wheat</option><option>Rice</option><option>Barley</option><option>Tomato</option>
               <option>Potato</option><option>Onion</option><option>Maize</option>
               <option>Sugarcane</option><option>Cotton</option><option>Soybean</option>
               <option>Mustard</option><option>Groundnut</option><option>Turmeric</option>
@@ -65,6 +65,15 @@
           <div class="form-group">
             <label class="form-label" for="harvest-date">Harvest Date</label>
             <input type="date" id="harvest-date" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="crop-image">📸 Upload Crop Photo</label>
+            <input type="file" id="crop-image" class="form-control" accept="image/*" onchange="previewImage(event)">
+            <div id="image-preview-container" class="mt-1 hidden" style="border: 2px dashed var(--border); padding: 10px; text-align: center; border-radius: var(--radius-sm);">
+                <img id="image-preview" src="#" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: var(--radius-sm);">
+                <p class="text-muted mt-1" style="font-size: 0.75rem;">Photo confirmed ✅</p>
+            </div>
           </div>
 
           <div class="form-group">
@@ -99,6 +108,7 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/db.js"></script>
+  <script src="js/raitha-mithra.js"></script>
   <script>
     registerServiceWorker();
     const profile = requireAuth('farmer');
@@ -146,6 +156,12 @@
         return;
       }
 
+      const imageFile = document.getElementById('crop-image').files[0];
+      let imageUrl = null;
+      if (imageFile) {
+        imageUrl = await convertToBase64(imageFile);
+      }
+
       const cropData = {
         farmer_id: profile.id,
         farmer_name: profile.full_name,
@@ -155,6 +171,7 @@
         quantity_kg: parseFloat(document.getElementById('quantity').value),
         price_per_kg: parseFloat(document.getElementById('price').value),
         harvest_date: document.getElementById('harvest-date').value || null,
+        image_url: imageUrl,
         description: document.getElementById('description').value.trim()
       };
 
@@ -186,6 +203,32 @@
         btn.disabled = false;
         btn.textContent = '📤 Publish Listing';
       }
+    }
+
+    function previewImage(event) {
+      const input = event.target;
+      const container = document.getElementById('image-preview-container');
+      const preview = document.getElementById('image-preview');
+      
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          container.classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function convertToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
     }
   </script>
 </body>

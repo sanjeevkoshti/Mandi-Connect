@@ -1,5 +1,5 @@
 // Mandi-Connect Service Worker
-const CACHE_NAME = 'mandi-connect-v1';
+const CACHE_NAME = 'mandi-connect-v3';
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
@@ -52,14 +52,17 @@ self.addEventListener('fetch', event => {
 
   // For API requests: network first, no cache fallback
   if (url.pathname.startsWith('/api/') || url.hostname.includes('supabase.co')) {
-    event.respondWith(
-      fetch(request).catch(() => {
-        return new Response(JSON.stringify({ success: false, error: 'You are offline' }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      })
-    );
-    return;
+    // Only intercept if it's our own domain's API
+    if (url.origin === location.origin) {
+      event.respondWith(
+        fetch(request).catch(() => {
+          return new Response(JSON.stringify({ success: false, error: 'You are offline' }), {
+            headers: { 'Content-Type': 'application/json' }
+          });
+        })
+      );
+      return;
+    }
   }
 
   // For navigation requests: load from cache, fallback to offline page

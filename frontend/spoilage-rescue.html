@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spoilage Rescue Network | Mandi-Connect</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#c53030">
+  <style>
+    .rescue-header {
+      background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+      color: white;
+      padding: 32px 16px;
+      text-align: center;
+    }
+    .rescue-card {
+      border-left: 5px solid var(--danger);
+      background: #fffafa;
+    }
+    .urgency-high { color: #c53030; font-weight: 800; animation: flash 1.5s infinite; }
+    @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    
+    .rescue-stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .rescue-stat {
+      flex: 1;
+      background: white;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .rescue-stat-val { font-size: 1.5rem; font-weight: 800; color: var(--danger); }
+    
+    .process-badge {
+      background: #fefcbf;
+      color: #744210;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body class="page-with-bottom-nav">
+  <nav class="navbar" style="background: #9b2c2c;">
+    <div class="container">
+      <div class="navbar-brand">🌾 Mandi<span>Connect</span></div>
+      <div class="navbar-links">
+        <a href="farmer-dashboard.html">Dashboard</a>
+        <a href="spoilage-rescue.html" class="active">Rescue Network</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="rescue-header">
+    <h1>🆘 Spoilage Rescue Network</h1>
+    <p>Connect with bulk buyers, NGOs, and processing units for urgent crop rescue</p>
+  </div>
+
+  <main>
+    <div class="container">
+      <!-- Rescue Intro -->
+      <div class="card mb-3" style="border: 2px dashed #feb2b2;">
+        <h3>Why use Rescue Network?</h3>
+        <p class="text-muted">If your highly perishable crops (Tomatoes, Greens, Fruits) are at risk of spoiling, list them here at a discount to reach food processing factories and NGOs instantly.</p>
+        <button id="show-form-btn" class="btn btn-danger mt-1">🆘 List Emergency Rescue</button>
+      </div>
+
+      <!-- Listing Form (Hidden by default) -->
+      <div id="rescue-form-container" class="card mb-3 hidden">
+        <div class="flex-between mb-2">
+            <h3>New Emergency Listing</h3>
+            <button class="btn btn-sm btn-outline" onclick="toggleForm()">Close</button>
+        </div>
+        <form id="rescue-form">
+          <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Perishable Crop</label>
+                <input type="text" id="crop_name" class="form-control" placeholder="e.g. Tomatoes" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Approx Quantity (kg)</label>
+                <input type="number" id="quantity_kg" class="form-control" required>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Original Price (₹/kg)</label>
+                <input type="number" id="original_price" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rescue Price (₹/kg)</label>
+                <input type="number" id="discount_price" class="form-control" placeholder="Lower Price" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Critical Window (Hours left until spoil)</label>
+            <select id="hours_left" class="form-control" required>
+                <option value="12">Extremely Urgent (< 12 hrs)</option>
+                <option value="24" selected>Highly Urgent (< 24 hrs)</option>
+                <option value="48">Urgent (< 48 hrs)</option>
+                <option value="72">Needs Attention (< 72 hrs)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description / Condition</label>
+            <textarea id="description" class="form-control" rows="2" placeholder="Describe the freshness level..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-danger btn-block">🚀 Broadcast Rescue Request</button>
+        </form>
+      </div>
+
+      <!-- My Rescue Listings -->
+      <div class="section">
+        <div class="section-title">My Rescue Broadcasts</div>
+        <div id="rescue-loading"><div class="spinner"></div></div>
+        <div id="rescue-list"></div>
+      </div>
+
+      <!-- Network Reach -->
+      <div class="section">
+        <div class="section-title">Network Status</div>
+        <div class="rescue-stats">
+            <div class="rescue-stat">
+                <div class="rescue-stat-val">12</div>
+                <div class="rescue-label">Processing Units Online</div>
+            </div>
+            <div class="rescue-stat">
+                <div class="rescue-stat-val">5</div>
+                <div class="rescue-label">NGOs Ready</div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="farmer-dashboard.html"><span class="nav-icon">🏠</span>Home</a>
+    <a href="spoilage-rescue.html" class="active"><span class="nav-icon">🆘</span>Rescue</a>
+    <a href="ai-predictor.html"><span class="nav-icon">🤖</span>Predict</a>
+    <a href="add-crop.html"><span class="nav-icon">➕</span>Add Crop</a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/raitha-mithra.js"></script>
+  <script>
+    const profile = requireAuth('farmer');
+
+    function toggleForm() {
+        const el = document.getElementById('rescue-form-container');
+        el.classList.toggle('hidden');
+    }
+
+    document.getElementById('show-form-btn').addEventListener('click', toggleForm);
+
+    document.getElementById('rescue-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        btn.disabled = true;
+        btn.textContent = 'Broadcasting...';
+
+        const data = {
+            farmer_id: profile.id,
+            farmer_name: profile.full_name,
+            farmer_location: profile.location,
+            crop_name: document.getElementById('crop_name').value,
+            quantity_kg: parseInt(document.getElementById('quantity_kg').value),
+            original_price: parseFloat(document.getElementById('original_price').value),
+            discount_price: parseFloat(document.getElementById('discount_price').value),
+            hours_left: parseInt(document.getElementById('hours_left').value),
+            description: document.getElementById('description').value
+        };
+
+        try {
+            const res = await api.createRescueListing(data);
+            if (res.success) {
+                showAlert('✅ Emergency broadcast sent to processing units!', 'success');
+                e.target.reset();
+                toggleForm();
+                loadRescueListings();
+            } else {
+                showAlert(res.error);
+            }
+        } catch (err) {
+            showAlert('Broadcast failed. Check connection.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🚀 Broadcast Rescue Request';
+        }
+    });
+
+    async function loadRescueListings() {
+        const listEl = document.getElementById('rescue-list');
+        const loadingEl = document.getElementById('rescue-loading');
+        loadingEl.style.display = 'block';
+
+        try {
+            const res = await api.getRescueByFarmer(profile.id);
+            const listings = res.data || [];
+            
+            if (listings.length === 0) {
+                listEl.innerHTML = `<div class="empty-state"><h3>No active emergency broadcasts</h3><p>Use the form above if you have crops at risk of spoiling.</p></div>`;
+            } else {
+                listEl.innerHTML = listings.map(L => `
+                    <div class="card rescue-card mb-2">
+                        <div class="flex-between">
+                            <div>
+                                <h3 style="margin:0;">🆘 ${L.crop_name}</h3>
+                                <div class="text-muted">${L.quantity_kg} kg · ₹${L.discount_price}/kg (Rescue Price)</div>
+                            </div>
+                            <span class="badge ${L.urgency_level === 'high' ? 'badge-rejected' : 'badge-pending'}">
+                                ${L.urgency_level.toUpperCase()} URGENCY
+                            </span>
+                        </div>
+                        <div class="mt-1">
+                            <span class="urgency-high">⏳ ${L.hours_left} hours left</span>
+                            <p style="font-size:0.88rem;margin-top:6px;">${L.description || 'No additional details.'}</p>
+                        </div>
+                        <div class="mt-1 flex gap-1">
+                            <span class="process-badge">📡 Broadcasting to 4 Factories</span>
+                            <span class="process-badge">🛰️ 2 NGOs Notified</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch (err) {
+            listEl.innerHTML = '<div class="alert alert-error">Failed to load broadcasts.</div>';
+        } finally {
+            loadingEl.style.display = 'none';
+        }
+    }
+
+    loadRescueListings();
+  </script>
+</body>
+</html>

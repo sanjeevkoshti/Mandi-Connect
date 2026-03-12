@@ -102,4 +102,19 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
+// DELETE a crop listing
+router.delete('/:id', async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('crops')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.json({ success: true, message: 'Crop deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;

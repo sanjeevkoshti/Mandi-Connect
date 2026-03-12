@@ -1,20 +1,31 @@
-// Mandi-Connect Auth Module - Uses Supabase for Auth + IndexedDB for offline session
-const SUPABASE_URL = 'https://gdzkixmschicixsrzqvb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkemtpeG1zY2hpY2l4c3J6cXZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDk4MjIsImV4cCI6MjA4ODg4NTgyMn0.lORtoWso3Jd4YJ-FMVPepyWCsaY-Za1rXPyw0fiTqh8';
+// Mandi-Connect Auth Module - Email OTP Authentication
+// Calls backend API for Email OTP via Nodemailer + Gmail SMTP
 
-// We load Supabase from CDN in the HTML
-let supabaseClient = null;
-function getSupabase() {
-  if (!supabaseClient && window.supabase) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-  return supabaseClient;
+const OTP_API = 'http://localhost:3002/api/otp';
+
+// Users DB in LocalStorage
+if (!localStorage.getItem('mc_users')) {
+  localStorage.setItem('mc_users', JSON.stringify([]));
 }
 
-// Session helpers using localStorage for instant access
-function saveLocalSession(profile, session) {
+function getLocalUsers() {
+  return JSON.parse(localStorage.getItem('mc_users')) || [];
+}
+
+function saveLocalUser(user) {
+  const users = getLocalUsers();
+  const existingIndex = users.findIndex(u => u.email === user.email);
+  if (existingIndex !== -1) {
+    users[existingIndex] = user;
+  } else {
+    users.push(user);
+  }
+  localStorage.setItem('mc_users', JSON.stringify(users));
+}
+
+// Session helpers
+function saveLocalSession(profile) {
   localStorage.setItem('mc_profile', JSON.stringify(profile));
-  localStorage.setItem('mc_session', JSON.stringify(session));
 }
 
 function getLocalProfile() {
@@ -23,7 +34,6 @@ function getLocalProfile() {
 
 function clearLocalSession() {
   localStorage.removeItem('mc_profile');
-  localStorage.removeItem('mc_session');
 }
 
 // Guard: redirect to login if not authenticated
@@ -40,48 +50,50 @@ function requireAuth(role = null) {
   return profile;
 }
 
-// Register a new user
-async function registerUser(email, password, fullName, phone, location, role) {
-  const sb = getSupabase();
-  const { data, error } = await sb.auth.signUp({ email, password });
-  if (error) throw error;
+// =============================================
+//  EMAIL OTP FUNCTIONS
+// =============================================
 
-  // Insert profile row
-  const { error: profileError } = await sb.from('profiles').insert([{
-    id: data.user.id,
-    role,
-    full_name: fullName,
-    phone,
-    location
-  }]);
-  if (profileError) throw profileError;
+/**
+ * Send OTP to email via backend (Nodemailer + Gmail SMTP)
+ */
+async function apiSendOTP(email) {
+  const res = await fetch(`${OTP_API}/send`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
 
-  const profile = { id: data.user.id, role, full_name: fullName, phone, location, email };
-  saveLocalSession(profile, data.session);
-  return profile;
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    throw new Error(data.error || 'Failed to send OTP');
+  }
+
+  return { success: true, message: data.message };
 }
 
-// Login existing user
-async function loginUser(email, password) {
-  const sb = getSupabase();
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) throw error;
+/**
+ * Verify OTP via backend
+ */
+async function apiVerifyOTP(email, otp) {
+  const res = await fetch(`${OTP_API}/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, otp })
+  });
 
-  // Fetch profile
-  const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
-  if (pErr) throw pErr;
+  const data = await res.json();
 
-  const profileWithEmail = { ...profile, email: data.user.email };
-  saveLocalSession(profileWithEmail, data.session);
-  return profileWithEmail;
+  if (!res.ok || !data.success) {
+    throw new Error(data.error || 'Invalid OTP. Please try again.');
+  }
+
+  return { success: true, verified: data.verified, message: data.message };
 }
 
 // Logout
 async function logoutUser() {
-  try {
-    const sb = getSupabase();
-    await sb.auth.signOut();
-  } catch (e) { /* ignore if offline */ }
   clearLocalSession();
   window.location.href = '/login.html';
 }
@@ -95,6 +107,9 @@ function renderNavUser() {
   }
   const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', logoutUser);
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      logoutUser();
+    });
   }
 }
