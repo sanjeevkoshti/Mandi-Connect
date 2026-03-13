@@ -228,7 +228,7 @@
         const result = await api.placeOrder(orderData);
         if (!result.success) throw new Error(result.error);
         closeModal();
-        showAlert(`✅ Order placed! Total: ₹${result.data.total_amount}`, 'success');
+        showAlert(`✅ Order placed! Total: ₹${result.data.total_price}`, 'success');
         setTimeout(() => window.location.href = `/order-management.html`, 1500);
       } catch (err) {
         showAlert(err.message || 'Failed to place order.', 'error');

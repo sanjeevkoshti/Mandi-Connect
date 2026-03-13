@@ -100,7 +100,7 @@
           </div>
           <div class="crop-meta">
             <span>📦 ${o.quantity_kg} kg</span>
-            <span>💰 ₹${o.total_amount}</span>
+            <span>💰 ₹${o.total_price}</span>
             <span>📅 ${formatDate(o.created_at)}</span>
           </div>
           ${profile.role === 'farmer' ? `
@@ -141,7 +141,7 @@
     function getRetailerActions(o) {
       if (profile.role !== 'retailer') return '';
       if (o.status === 'accepted' && o.payment_status === 'unpaid') {
-        return `<a href="payment.html?orderId=${o.id}" class="btn btn-accent btn-sm">💳 Pay Now ₹${o.total_amount}</a>`;
+        return `<a href="payment.html?orderId=${o.id}" class="btn btn-accent btn-sm">💳 Pay Now ₹${o.total_price}</a>`;
       }
       if (o.status !== 'pending' && o.status !== 'rejected') {
         return `<a href="tracking.html?orderId=${o.id}" class="btn btn-outline btn-sm">🔍 Track Order</a>`;

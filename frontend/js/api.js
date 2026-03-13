@@ -1,9 +1,6 @@
-const API_BASE = 'http://localhost:3002/api';
+// Mandi-Connect API library
+const API_BASE = 'http://10.218.38.191:3002/api';
 
-// --- NEW: LocalStorage Mock Data for Demo ---
-if (!localStorage.getItem('mandi_crops')) {
-  localStorage.setItem('mandi_crops', JSON.stringify([]));
-}
 // --------------------------------------------
 
 const api = {
@@ -11,61 +8,32 @@ const api = {
   
   // Crops
   async getCrops(cropName = '') {
-    let remoteCrops = [];
     try {
       const url = cropName ? `${API_BASE}/crops?crop_name=${encodeURIComponent(cropName)}` : `${API_BASE}/crops`;
       const res = await fetch(url).catch(() => null);
       if (res && res.ok) {
         const json = await res.json().catch(() => ({}));
-        remoteCrops = json.data || [];
+        const remoteCrops = json.data || [];
+        return { success: true, data: remoteCrops.filter(c => c.is_available) };
       }
     } catch (e) {}
     
-    let localCrops = JSON.parse(localStorage.getItem('mandi_crops')) || [];
-    if (cropName) {
-      localCrops = localCrops.filter(c => c.crop_name.toLowerCase().includes(cropName.toLowerCase()));
-    }
-
-    const merged = new Map();
-    localCrops.forEach(c => merged.set(c.id, c));
-    remoteCrops.forEach(c => merged.set(c.id, c));
-
-    const finalData = Array.from(merged.values()).filter(c => c.is_available);
-    return { success: true, data: finalData };
+    return { success: true, data: [] };
   },
 
   async getCropsByFarmer(farmerId) {
-    let remoteCrops = [];
     try {
       const res = await fetch(`${API_BASE}/crops/farmer/${farmerId}`).catch(() => null);
       if (res && res.ok) {
         const json = await res.json().catch(() => ({}));
-        remoteCrops = json.data || [];
+        return { success: true, data: json.data || [] };
       }
     } catch (e) {}
     
-    const localCrops = (JSON.parse(localStorage.getItem('mandi_crops')) || [])
-                        .filter(c => c.farmer_id === farmerId);
-
-    const merged = new Map();
-    localCrops.forEach(c => merged.set(c.id, c));
-    remoteCrops.forEach(c => merged.set(c.id, c));
-
-    return { success: true, data: Array.from(merged.values()) };
+    return { success: true, data: [] };
   },
 
   async addCrop(cropData) {
-    // 1. Save to LocalStorage first
-    const crops = JSON.parse(localStorage.getItem('mandi_crops')) || [];
-    const newCrop = { 
-        ...cropData, 
-        id: 'local_' + Date.now(), 
-        created_at: new Date().toISOString(),
-        is_available: true 
-    };
-    crops.push(newCrop);
-    localStorage.setItem('mandi_crops', JSON.stringify(crops));
-
     try {
       const res = await fetch(`${API_BASE}/crops`, {
         method: 'POST',
@@ -73,20 +41,13 @@ const api = {
         body: JSON.stringify(cropData)
       }).catch(() => null);
       
-      if (res && res.ok) return await res.json().catch(() => ({ success: true, data: newCrop }));
+      if (res && res.ok) return await res.json();
     } catch (e) {}
     
-    return { success: true, data: newCrop };
+    return { success: false, error: 'Offline - saved to local queue instead' };
   },
 
   async updateCrop(id, data) {
-    let crops = JSON.parse(localStorage.getItem('mandi_crops')) || [];
-    const index = crops.findIndex(c => c.id === id);
-    if (index !== -1) {
-      crops[index] = { ...crops[index], ...data };
-      localStorage.setItem('mandi_crops', JSON.stringify(crops));
-    }
-
     try {
       const res = await fetch(`${API_BASE}/crops/${id}`, {
         method: 'PATCH',
@@ -96,14 +57,10 @@ const api = {
       if (res && res.ok) return await res.json().catch(() => ({ success: true }));
     } catch (e) {}
     
-    return { success: true };
+    return { success: false, error: 'Offline - cannot update now' };
   },
 
   async deleteCrop(id) {
-    let crops = JSON.parse(localStorage.getItem('mandi_crops')) || [];
-    crops = crops.filter(c => c.id !== id);
-    localStorage.setItem('mandi_crops', JSON.stringify(crops));
-
     try {
       const res = await fetch(`${API_BASE}/crops/${id}`, {
         method: 'DELETE'
@@ -111,7 +68,7 @@ const api = {
       if (res && res.ok) return await res.json().catch(() => ({ success: true }));
     } catch (e) {}
     
-    return { success: true };
+    return { success: false, error: 'Offline - cannot delete now' };
   },
 
   // Orders
@@ -140,16 +97,6 @@ const api = {
   },
 
   async placeOrder(orderData) {
-    let crops = JSON.parse(localStorage.getItem('mandi_crops')) || [];
-    const cropIndex = crops.findIndex(c => c.id === orderData.crop_id);
-    if (cropIndex !== -1) {
-        crops[cropIndex].quantity_kg -= orderData.quantity_kg;
-        if (crops[cropIndex].quantity_kg <= 0) {
-            crops[cropIndex].quantity_kg = 0;
-            crops[cropIndex].is_available = false;
-        }
-        localStorage.setItem('mandi_crops', JSON.stringify(crops));
-    }
 
     try {
       const res = await fetch(`${API_BASE}/orders`, {
@@ -157,10 +104,10 @@ const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       }).catch(() => null);
-      if (res && res.ok) return await res.json().catch(() => ({ success: true, data: { ...orderData, id: 'order_' + Date.now(), total_amount: orderData.quantity_kg * orderData.price_per_kg } }));
+      if (res && res.ok) return await res.json().catch(() => ({ success: true, data: { ...orderData, id: 'order_' + Date.now(), total_price: orderData.quantity_kg * orderData.price_per_kg } }));
     } catch (e) {}
     
-    return { success: true, data: { ...orderData, id: 'order_' + Date.now(), total_amount: orderData.quantity_kg * orderData.price_per_kg } };
+    return { success: true, data: { ...orderData, id: 'order_' + Date.now(), total_price: orderData.quantity_kg * orderData.price_per_kg } };
   },
 
   async updateOrder(orderId, updates) {
@@ -203,33 +150,6 @@ const api = {
     return { success: true, prediction: 25.5, trend: 'stable', forecast: [] }; // Mock
   },
 
-  async getRescueListings() {
-    try {
-      const res = await fetch(`${API_BASE}/rescue`).catch(() => null);
-      if (res && res.ok) return await res.json();
-    } catch (e) {}
-    return { success: true, data: [] };
-  },
-
-  async getRescueByFarmer(farmerId) {
-    try {
-      const res = await fetch(`${API_BASE}/rescue/farmer/${farmerId}`).catch(() => null);
-      if (res && res.ok) return await res.json();
-    } catch (e) {}
-    return { success: true, data: [] };
-  },
-
-  async createRescueListing(data) {
-    try {
-      const res = await fetch(`${API_BASE}/rescue`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      }).catch(() => null);
-      if (res && res.ok) return await res.json();
-    } catch (e) {}
-    return { success: true, data: data };
-  },
 
   async raithaMithraChat(message, lang = 'en') {
     try {

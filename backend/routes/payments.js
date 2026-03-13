@@ -17,7 +17,7 @@ router.get('/upi/:orderId', async (req, res) => {
 
     // UPI payment string (standard format)
     const upiId = 'mandiconnect@upi'; // Demo UPI ID
-    const amount = order.total_amount;
+    const amount = order.total_price;
     const note = `Order:${order.id.slice(0,8)} | ${order.crop_name}`;
     const upiLink = `upi://pay?pa=${upiId}&pn=MandiConnect&am=${amount}&tn=${encodeURIComponent(note)}&cu=INR`;
 
@@ -25,7 +25,7 @@ router.get('/upi/:orderId', async (req, res) => {
       success: true,
       data: {
         orderId: order.id,
-        amount: order.total_amount,
+        amount: order.total_price,
         cropName: order.crop_name,
         quantityKg: order.quantity_kg,
         upiId,

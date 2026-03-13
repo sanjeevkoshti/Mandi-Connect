@@ -6,9 +6,9 @@ const cropsRouter = require('./routes/crops');
 const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
 const aiRouter = require('./routes/ai');
-const rescueRouter = require('./routes/rescue');
 const chatRouter = require('./routes/chat');
 const otpRouter = require('./routes/otp');
+const authRouter = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -27,9 +27,9 @@ app.use('/api/crops', cropsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/ai', aiRouter);
-app.use('/api/rescue', rescueRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/otp', otpRouter);
+app.use('/api/auth', authRouter);
 
 // 404 handler
 app.use((req, res) => {

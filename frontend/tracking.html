@@ -97,7 +97,7 @@
           <table style="width:100%;border-spacing:0 6px;">
             <tr><td class="text-muted">Order ID</td><td style="text-align:right;font-size:0.8rem;font-weight:600;">#${o.id.slice(0,12).toUpperCase()}</td></tr>
             <tr><td class="text-muted">Quantity</td><td style="text-align:right;">${o.quantity_kg} kg</td></tr>
-            <tr><td class="text-muted">Total Amount</td><td style="text-align:right;font-weight:700;color:var(--primary);">₹${o.total_amount}</td></tr>
+            <tr><td class="text-muted">Total Amount</td><td style="text-align:right;font-weight:700;color:var(--primary);">₹${o.total_price}</td></tr>
             <tr><td class="text-muted">Payment</td><td style="text-align:right;">${o.payment_status === 'paid' ? '✅ Paid' : '❌ Unpaid'}</td></tr>
             <tr><td class="text-muted">Ordered On</td><td style="text-align:right;">${formatDate(o.created_at)}</td></tr>
           </table>

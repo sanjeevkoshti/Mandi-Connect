@@ -14,9 +14,6 @@ const SMTP_PASSWORD = process.env.SMTP_PASSWORD || '';
 function createTransporter() {
   return nodemailer.createTransport({
     service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
     auth: {
       user: SMTP_EMAIL,
       pass: SMTP_PASSWORD
@@ -45,7 +42,7 @@ function checkRateLimit(email) {
 // ========== SEND OTP ==========
 router.post('/send', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, checkRegistration } = req.body; // checkRegistration: 'login' or 'register'
     if (!email) {
       return res.status(400).json({ success: false, error: 'Email address is required' });
     }
@@ -57,6 +54,22 @@ router.post('/send', async (req, res) => {
     }
 
     const emailKey = email.toLowerCase().trim();
+
+    // Check registration status if requested
+    if (checkRegistration) {
+      const { data: user, error } = await require('../supabase')
+        .from('profiles')
+        .select('email')
+        .eq('email', emailKey)
+        .single();
+      
+      if (checkRegistration === 'login' && (!user || error)) {
+        return res.status(404).json({ success: false, error: 'This email is not registered. Please register first.' });
+      }
+      if (checkRegistration === 'register' && user) {
+        return res.status(400).json({ success: false, error: 'This email is already registered. Please login.' });
+      }
+    }
 
     // Rate limit
     if (!checkRateLimit(emailKey)) {
@@ -77,8 +90,11 @@ router.post('/send', async (req, res) => {
 
     // Check SMTP credentials
     if (!SMTP_EMAIL || !SMTP_PASSWORD) {
-      console.error('[OTP] SMTP_EMAIL or SMTP_PASSWORD not set in .env');
-      return res.status(500).json({ success: false, error: 'Email service not configured. Add SMTP_EMAIL and SMTP_PASSWORD to backend/.env' });
+      console.warn('[OTP] ⚠️ SMTP_EMAIL or SMTP_PASSWORD not set in .env. Running in DEV mode (OTP logged to console ONLY).');
+      return res.json({ 
+        success: true, 
+        message: `[DEV MODE] OTP logged to server terminal for testing.` 
+      });
     }
 
     // Send email
@@ -119,9 +135,13 @@ router.post('/send', async (req, res) => {
 
     } catch (emailErr) {
       console.error('[OTP] Email send error:', emailErr.message);
+      
+      // Fallback for development if email fails
+      console.warn(`[OTP] ⚠️ FALLBACK: Could not send real email. Your OTP for ${emailKey} is: ${otp}`);
+      
       return res.status(500).json({
         success: false,
-        error: 'Failed to send email. Please check SMTP credentials.'
+        error: `Failed to send email. Check SMTP settings. (DEV: OTP is logged in terminal)`
       });
     }
 

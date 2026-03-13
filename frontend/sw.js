@@ -1,5 +1,5 @@
 // Mandi-Connect Service Worker
-const CACHE_NAME = 'mandi-connect-v3';
+const CACHE_NAME = 'mandi-connect-v4';
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
