@@ -146,7 +146,8 @@ router.post('/forgot-password', async (req, res) => {
       .eq('email', emailKey);
 
     // Send Email
-    const resetUrl = `http://10.218.38.191:3000/reset-password.html?token=${token}&email=${emailKey}`;
+    const frontendUrl = process.env.FRONTEND_URL || `http://localhost:3000`;
+    const resetUrl = `${frontendUrl}/reset-password.html?token=${token}&email=${emailKey}`;
     
     // In a real app, this would be the frontend URL. 
     // Since the frontend is currently served statically or via simple server, 

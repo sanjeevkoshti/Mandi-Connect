@@ -1,8 +1,8 @@
 // Mandi-Connect Auth Module - Email OTP Authentication
 // Calls backend API for Email OTP via Nodemailer + Gmail SMTP
 
-const OTP_API = 'http://10.21.61.191:3002/api/otp';
-const AUTH_API = 'http://10.21.61.191:3002/api/auth';
+const OTP_API = `http://${window.location.hostname}:3002/api/otp`;
+const AUTH_API = `http://${window.location.hostname}:3002/api/auth`;
 
 // Users DB in LocalStorage
 if (!localStorage.getItem('mc_users')) {

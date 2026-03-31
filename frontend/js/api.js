@@ -1,5 +1,14 @@
 // Mandi-Connect API library
-const API_BASE = 'http://10.218.38.191:3002/api';
+// Dynamically resolve backend URL based on current hostname
+const API_BASE = `http://${window.location.hostname}:3002/api`;
+
+// Helper: fetch with timeout to avoid hanging on slow/unreachable server
+function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
 
 // --------------------------------------------
 
@@ -10,7 +19,7 @@ const api = {
   async getCrops(cropName = '') {
     try {
       const url = cropName ? `${API_BASE}/crops?crop_name=${encodeURIComponent(cropName)}` : `${API_BASE}/crops`;
-      const res = await fetch(url).catch(() => null);
+      const res = await fetchWithTimeout(url).catch(() => null);
       if (res && res.ok) {
         const json = await res.json().catch(() => ({}));
         const remoteCrops = json.data || [];
@@ -23,7 +32,7 @@ const api = {
 
   async getCropsByFarmer(farmerId) {
     try {
-      const res = await fetch(`${API_BASE}/crops/farmer/${farmerId}`).catch(() => null);
+      const res = await fetchWithTimeout(`${API_BASE}/crops/farmer/${farmerId}`).catch(() => null);
       if (res && res.ok) {
         const json = await res.json().catch(() => ({}));
         return { success: true, data: json.data || [] };
@@ -35,7 +44,7 @@ const api = {
 
   async addCrop(cropData) {
     try {
-      const res = await fetch(`${API_BASE}/crops`, {
+      const res = await fetchWithTimeout(`${API_BASE}/crops`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cropData)
@@ -49,7 +58,7 @@ const api = {
 
   async updateCrop(id, data) {
     try {
-      const res = await fetch(`${API_BASE}/crops/${id}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/crops/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -62,7 +71,7 @@ const api = {
 
   async deleteCrop(id) {
     try {
-      const res = await fetch(`${API_BASE}/crops/${id}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/crops/${id}`, {
         method: 'DELETE'
       }).catch(() => null);
       if (res && res.ok) return await res.json().catch(() => ({ success: true }));
@@ -74,7 +83,7 @@ const api = {
   // Orders
   async getOrdersByFarmer(farmerId) {
     try {
-      const res = await fetch(`${API_BASE}/orders/farmer/${farmerId}`).catch(() => null);
+      const res = await fetchWithTimeout(`${API_BASE}/orders/farmer/${farmerId}`).catch(() => null);
       if (res && res.ok) return await res.json();
     } catch (e) {}
     return { success: true, data: [] };
@@ -82,7 +91,7 @@ const api = {
 
   async getOrdersByRetailer(retailerId) {
     try {
-      const res = await fetch(`${API_BASE}/orders/retailer/${retailerId}`).catch(() => null);
+      const res = await fetchWithTimeout(`${API_BASE}/orders/retailer/${retailerId}`).catch(() => null);
       if (res && res.ok) return await res.json();
     } catch (e) {}
     return { success: true, data: [] };
@@ -90,7 +99,7 @@ const api = {
 
   async getOrder(orderId) {
     try {
-      const res = await fetch(`${API_BASE}/orders/${orderId}`).catch(() => null);
+      const res = await fetchWithTimeout(`${API_BASE}/orders/${orderId}`).catch(() => null);
       if (res && res.ok) return await res.json();
     } catch (e) {}
     return { success: false, error: 'Order not found' };
@@ -99,7 +108,7 @@ const api = {
   async placeOrder(orderData) {
 
     try {
-      const res = await fetch(`${API_BASE}/orders`, {
+      const res = await fetchWithTimeout(`${API_BASE}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
@@ -112,7 +121,7 @@ const api = {
 
   async updateOrder(orderId, updates) {
     try {
-      const res = await fetch(`${API_BASE}/orders/${orderId}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
@@ -124,7 +133,7 @@ const api = {
 
   async getPaymentDetails(orderId) {
     try {
-      const res = await fetch(`${API_BASE}/payments/upi/${orderId}`).catch(() => null);
+      const res = await fetchWithTimeout(`${API_BASE}/payments/upi/${orderId}`).catch(() => null);
       if (res && res.ok) return await res.json();
     } catch (e) {}
     return { success: false, error: 'Payment service unavailable' };
@@ -132,7 +141,7 @@ const api = {
 
   async confirmPayment(orderId, transactionId) {
     try {
-      const res = await fetch(`${API_BASE}/payments/confirm/${orderId}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/payments/confirm/${orderId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transactionId })
@@ -144,7 +153,7 @@ const api = {
 
   async getPrediction(crop) {
     try {
-      const res = await fetch(`${API_BASE}/ai/predict?crop=${encodeURIComponent(crop)}`).catch(() => null);
+      const res = await fetchWithTimeout(`${API_BASE}/ai/predict?crop=${encodeURIComponent(crop)}`).catch(() => null);
       if (res && res.ok) return await res.json();
     } catch (e) {}
     return { success: true, prediction: 25.5, trend: 'stable', forecast: [] }; // Mock
@@ -153,7 +162,7 @@ const api = {
 
   async raithaMithraChat(message, lang = 'en') {
     try {
-      const res = await fetch(`${API_BASE}/chat`, {
+      const res = await fetchWithTimeout(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message, lang })
