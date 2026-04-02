@@ -1,6 +1,9 @@
 // Mandi-Connect API library
 // Dynamically resolve backend URL based on current hostname
-const API_BASE = `http://${window.location.hostname}:3002/api`;
+const SERVER_PORT = 3002;
+const API_BASE = (window.location.hostname === '' || window.location.hostname === 'localhost') 
+  ? `http://localhost:${SERVER_PORT}/api` 
+  : `http://${window.location.hostname}:${SERVER_PORT}/api`;
 
 // Helper: fetch with timeout to avoid hanging on slow/unreachable server
 function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
@@ -33,16 +36,20 @@ const api = {
   },
 
   async addCrop(cropData) {
-    const res = await fetchWithTimeout(`${API_BASE}/crops`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cropData)
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to add crop');
+    try {
+      const res = await fetchWithTimeout(`${API_BASE}/crops`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cropData)
+      }).catch(() => null);
+      
+      if (res && res.ok) return await res.json();
+      if (res) return { success: false, error: `Server error: ${res.status}` };
+    } catch (e) {
+      console.warn('[API] Add crop failed:', e);
     }
-    return await res.json();
+    
+    return { success: false, error: 'Network-Error', isOffline: true };
   },
 
   async updateCrop(id, data) {
