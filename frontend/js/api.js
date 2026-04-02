@@ -90,16 +90,17 @@ const api = {
   },
 
   async placeOrder(orderData) {
-    const res = await fetchWithTimeout(`${API_BASE}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to place order');
-    }
-    return await res.json();
+
+    try {
+      const res = await fetchWithTimeout(`${API_BASE}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      }).catch(() => null);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+    
+    return { success: false, error: 'Could not place order' };
   },
 
   async updateOrder(orderId, updates) {
@@ -135,16 +136,17 @@ const api = {
   },
 
   async raithaMithraChat(message, lang = 'en') {
-    const res = await fetchWithTimeout(`${API_BASE}/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, lang })
-    });
-    if (!res.ok) throw new Error('Chat service unavailable');
-    return await res.json();
+    try {
+      const res = await fetchWithTimeout(`${API_BASE}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, lang })
+      }).catch(() => null);
+      if (res && res.ok) return await res.json();
+    } catch (e) {}
+    return { success: false, error: 'Network problem' };
   }
 };
-
 // Format helpers
 function formatCurrency(amount) {
   return `₹${Number(amount).toFixed(2)}`;

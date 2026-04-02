@@ -8,7 +8,11 @@
   <link rel="stylesheet" href="css/style.css">
   <meta name="theme-color" content="#0f3d2e">
 </head>
+<<<<<<< HEAD
 <body class="page-with-bottom-nav">
+=======
+<body>
+>>>>>>> 0e0f1492dde3689cf6b9a2b574666b0074f79cf8
 
   <nav class="navbar">
     <div class="container">
@@ -89,6 +93,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
+<<<<<<< HEAD
+=======
+  <script src="js/raitha-mithra.js"></script>
+>>>>>>> 0e0f1492dde3689cf6b9a2b574666b0074f79cf8
   <script>
     const profile = requireAuth('retailer');
     if (!profile) throw new Error('Redirect');
@@ -114,7 +122,11 @@
         document.getElementById('results-count').textContent = `${allCrops.length} listing${allCrops.length !== 1 ? 's' : ''} found`;
         renderCrops(allCrops);
       } catch (e) {
+<<<<<<< HEAD
         document.getElementById('crops-grid').innerHTML = '<div class="alert alert-warning">Could not load listings. Please check your connection.</div>';
+=======
+        document.getElementById('crops-grid').innerHTML = '<div class="alert alert-danger">Error loading marketplace. Please check your connection.</div>';
+>>>>>>> 0e0f1492dde3689cf6b9a2b574666b0074f79cf8
         document.getElementById('results-count').textContent = '';
       }
       document.getElementById('market-loading').style.display = 'none';

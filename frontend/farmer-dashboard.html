@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="css/style.css">
   <meta name="theme-color" content="#0f3d2e">
 </head>
-<body class="page-with-bottom-nav">
+<body>
 
   <nav class="navbar">
     <div class="container">
@@ -39,6 +39,8 @@
           <div class="stat-label">Pending Orders</div>
         </div>
       </div>
+
+
 
       <!-- Quick Actions -->
       <div class="section">
@@ -114,11 +116,10 @@
 
     renderNavUser();
 
-    document.getElementById('mobile-logout').addEventListener('click', (e) => {
+    document.getElementById('mobile-logout')?.addEventListener('click', (e) => {
       e.preventDefault();
       logoutUser();
     });
-
     async function loadDashboard() {
       const cropsList = document.getElementById('crops-list');
       cropsList.innerHTML = '<div class="spinner"></div>';
@@ -129,7 +130,8 @@
           api.getOrdersByFarmer(profile.id)
         ]);
 
-        currentCrops = cropsRes.data || [];
+        const remoteCrops = cropsRes.data || [];
+        currentCrops = remoteCrops;
         const orders = ordersRes.data || [];
         const pendingOrders = orders.filter(o => o.status === 'pending').length;
 
@@ -138,7 +140,7 @@
 
         renderCrops(currentCrops);
       } catch (e) {
-        cropsList.innerHTML = '<div class="alert alert-warning">Could not load listings. Please check your connection.</div>';
+        cropsList.innerHTML = '<div class="alert alert-danger">Error loading listings. Please check your connection.</div>';
       }
     }
 

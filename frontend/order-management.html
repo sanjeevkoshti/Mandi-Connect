@@ -6,10 +6,15 @@
   <title>Order Management | Mandi-Connect</title>
   <meta name="description" content="Manage incoming and outgoing orders on Mandi-Connect.">
   <link rel="stylesheet" href="css/style.css">
+<<<<<<< HEAD
   <meta name="theme-color" content="#0f3d2e">
 </head>
 <body class="page-with-bottom-nav">
 
+=======
+</head>
+<body>
+>>>>>>> 0e0f1492dde3689cf6b9a2b574666b0074f79cf8
 
   <nav class="navbar">
     <div class="container">
@@ -52,6 +57,10 @@
     const profile = requireAuth();
     if (!profile) throw new Error('Redirect');
     renderNavUser();
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0e0f1492dde3689cf6b9a2b574666b0074f79cf8
 
     document.getElementById('btn-logout').addEventListener('click', logoutUser);
     document.getElementById('mobile-logout-f') && document.getElementById('mobile-logout-f').addEventListener('click', e => { e.preventDefault(); logoutUser(); });
@@ -77,7 +86,11 @@
         }
         renderOrders(result.data || []);
       } catch (e) {
+<<<<<<< HEAD
         document.getElementById('orders-list').innerHTML = '<div class="alert alert-warning">Could not load orders. Please check your connection.</div>';
+=======
+        document.getElementById('orders-list').innerHTML = '<div class="alert alert-danger">Error loading orders. Please check your connection.</div>';
+>>>>>>> 0e0f1492dde3689cf6b9a2b574666b0074f79cf8
       }
       document.getElementById('orders-loading').style.display = 'none';
     }

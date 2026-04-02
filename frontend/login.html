@@ -6,7 +6,6 @@
   <title>Login / Register | Mandi-Connect</title>
   <meta name="description" content="Login or register to Mandi-Connect — the direct farm-to-retail marketplace.">
   <link rel="stylesheet" href="css/style.css">
-  <meta name="theme-color" content="#0f3d2e">
   <style>
     /* Popup Styles */
     .otp-popup-overlay {
@@ -53,6 +52,7 @@
   </style>
 </head>
 <body>
+  <div id="offline-banner" class="offline-banner">⚠️ You are offline</div>
 
   <!-- Success/Error Popup -->
   <div id="otp-popup-overlay" class="otp-popup-overlay">
@@ -199,7 +199,31 @@
       document.getElementById('otp-popup-overlay').classList.remove('show');
     }
 
-    // Auto-switch tab from URL
+    function startTimer(elementId, resendFn) {
+      const el = document.getElementById(elementId);
+      let remaining = 60;
+      el.innerHTML = `Resend OTP in <strong>${remaining}s</strong>`;
+      const interval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          el.innerHTML = `Didn't receive? <a id="${elementId}-resend">Resend OTP</a>`;
+          document.getElementById(`${elementId}-resend`).addEventListener('click', resendFn);
+        } else {
+          el.innerHTML = `Resend OTP in <strong>${remaining}s</strong>`;
+        }
+      }, 1000);
+    }
+
+    // Init
+    registerServiceWorker();
+    setupConnectivityMonitor();
+
+    const profile = getLocalProfile();
+    if (profile) {
+      window.location.href = profile.role === 'farmer' ? '/farmer-dashboard.html' : '/marketplace.html';
+    }
+
     const params = new URLSearchParams(window.location.search);
     if (params.get('role') === 'retailer') { switchTab('register'); setRole('retailer'); }
 

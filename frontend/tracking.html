@@ -6,10 +6,16 @@
   <title>Order Tracking | Mandi-Connect</title>
   <meta name="description" content="Track your order status and logistics on Mandi-Connect.">
   <link rel="stylesheet" href="css/style.css">
+<<<<<<< HEAD
   <meta name="theme-color" content="#0f3d2e">
 </head>
 <body>
 
+=======
+</head>
+<body>
+<body>
+>>>>>>> 0e0f1492dde3689cf6b9a2b574666b0074f79cf8
 
   <nav class="navbar">
     <div class="container">
@@ -67,6 +73,10 @@
   <script>
     const profile = requireAuth();
     if (!profile) throw new Error('Redirect');
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0e0f1492dde3689cf6b9a2b574666b0074f79cf8
 
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('orderId');
