@@ -119,10 +119,10 @@ const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       }).catch(() => null);
-      if (res && res.ok) return await res.json().catch(() => ({ success: true, data: { ...orderData, id: 'order_' + Date.now(), total_price: orderData.quantity_kg * orderData.price_per_kg } }));
+      if (res && res.ok) return await res.json();
     } catch (e) {}
     
-    return { success: true, data: { ...orderData, id: 'order_' + Date.now(), total_price: orderData.quantity_kg * orderData.price_per_kg } };
+    return { success: false, error: 'Could not place order' };
   },
 
   async updateOrder(orderId, updates) {
@@ -175,44 +175,9 @@ const api = {
       }).catch(() => null);
       if (res && res.ok) return await res.json();
     } catch (e) {}
-    return { success: true, reply: "I'm working in offline mode. How can I help you today?" };
+    return { success: false, error: 'Network problem' };
   }
 };
-
-// Online/Offline detector
-function setupConnectivityMonitor(onOnline, onOffline) {
-  const banner = document.getElementById('offline-banner');
-
-  function handleOnline() {
-    if (banner) banner.classList.remove('show');
-    document.body.classList.remove('offline-mode');
-    if (onOnline) onOnline();
-  }
-
-  function handleOffline() {
-    if (banner) banner.classList.add('show');
-    document.body.classList.add('offline-mode');
-    if (onOffline) onOffline();
-  }
-
-  window.addEventListener('online', handleOnline);
-  window.addEventListener('offline', handleOffline);
-
-  if (!navigator.onLine) handleOffline();
-}
-
-// Service Worker registration
-function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => {
-        console.log('[SW] Registered:', reg.scope);
-        return reg;
-      })
-      .catch(err => console.error('[SW] Registration failed:', err));
-  }
-}
-
 // Format helpers
 function formatCurrency(amount) {
   return `₹${Number(amount).toFixed(2)}`;

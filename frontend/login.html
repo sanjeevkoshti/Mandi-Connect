@@ -6,8 +6,6 @@
   <title>Login / Register | Mandi-Connect</title>
   <meta name="description" content="Login or register to Mandi-Connect — the direct farm-to-retail marketplace.">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f3d2e">
   <style>
     .otp-popup-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.5);
@@ -61,7 +59,7 @@
   </style>
 </head>
 <body>
-  <div id="offline-banner" class="offline-banner">⚠️ You are offline</div>
+<body>
 
   <!-- Popup -->
   <div id="otp-popup-overlay" class="otp-popup-overlay">
@@ -242,8 +240,8 @@
     }
 
     // Init
-    registerServiceWorker();
-    setupConnectivityMonitor();
+    // Init
+
 
     const profile = getLocalProfile();
     if (profile) {
