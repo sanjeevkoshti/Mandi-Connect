@@ -162,7 +162,27 @@ const api = {
       const res = await fetchWithTimeout(`${API_BASE}/ai/predict?crop=${encodeURIComponent(crop)}`).catch(() => null);
       if (res && res.ok) return await res.json();
     } catch (e) {}
-    return { success: true, prediction: 25.5, trend: 'stable', forecast: [] }; // Mock
+    // Mock response when backend is offline
+    return { 
+      success: true, 
+      crop: crop,
+      prediction: {
+        current_market_price: 24.50,
+        predicted_price: 26.00,
+        confidence: "82%",
+        recommendation: "Prices are expected to rise. Hold your stock for a week for better returns.",
+        trend: "up",
+        forecast_chart: [
+          { date: "Day 1", price: 24.50 },
+          { date: "Day 2", price: 24.80 },
+          { date: "Day 3", price: 25.00 },
+          { date: "Day 4", price: 25.30 },
+          { date: "Day 5", price: 25.60 },
+          { date: "Day 6", price: 25.80 },
+          { date: "Day 7", price: 26.00 }
+        ]
+      }
+    };
   },
 
 

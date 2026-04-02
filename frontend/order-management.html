@@ -11,10 +11,15 @@
 
   <nav class="navbar">
     <div class="container">
-      <div class="navbar-brand">🌾 Mandi<span>Connect</span></div>
+      <div class="navbar-brand" data-i18n="nav_brand">🌾 Mandi<span>Connect</span></div>
       <div class="navbar-links">
+        <select class="i18n-select" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; margin-right: 10px; outline: none; cursor: pointer;">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        </select>
         <span id="nav-user-info" style="color:rgba(255,255,255,0.8);font-size:0.88rem;"></span>
-        <button id="btn-logout" class="btn btn-outline btn-sm" style="color:white;border-color:rgba(255,255,255,0.4);">Logout</button>
+        <button id="btn-logout" class="btn btn-outline btn-sm" style="color:white;border-color:rgba(255,255,255,0.4);" data-i18n="nav_logout">Logout</button>
       </div>
     </div>
   </nav>
@@ -45,6 +50,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/api.js"></script>
+
+  <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
   <script>
     const profile = requireAuth();
@@ -56,13 +63,24 @@
     document.getElementById('mobile-logout-f') && document.getElementById('mobile-logout-f').addEventListener('click', e => { e.preventDefault(); logoutUser(); });
     document.getElementById('mobile-logout-r') && document.getElementById('mobile-logout-r').addEventListener('click', e => { e.preventDefault(); logoutUser(); });
 
+    const getT = (key) => (window.i18n && window.i18n.get(key)) || key;
+    let currentOrders = [];
+
     if (profile.role === 'farmer') {
-      document.getElementById('page-title').textContent = '📦 Incoming Orders';
-      document.getElementById('page-subtitle').textContent = 'Accept or reject orders from retailers';
+      const titleEl = document.getElementById('page-title');
+      const subEl = document.getElementById('page-subtitle');
+      titleEl.textContent = getT('incoming_orders');
+      titleEl.setAttribute('data-i18n', 'incoming_orders');
+      subEl.textContent = getT('incoming_orders_subtitle');
+      subEl.setAttribute('data-i18n', 'incoming_orders_subtitle');
       document.getElementById('farmer-bottom-nav').style.display = 'flex';
     } else {
-      document.getElementById('page-title').textContent = '📋 My Order History';
-      document.getElementById('page-subtitle').textContent = 'Track your placed orders';
+      const titleEl = document.getElementById('page-title');
+      const subEl = document.getElementById('page-subtitle');
+      titleEl.textContent = getT('my_order_history');
+      titleEl.setAttribute('data-i18n', 'my_order_history');
+      subEl.textContent = getT('my_order_history_subtitle');
+      subEl.setAttribute('data-i18n', 'my_order_history_subtitle');
       document.getElementById('retailer-bottom-nav').style.display = 'flex';
     }
 
@@ -74,9 +92,11 @@
         } else {
           result = await api.getOrdersByRetailer(profile.id);
         }
-        renderOrders(result.data || []);
+        currentOrders = result.data || [];
+        renderOrders(currentOrders);
       } catch (e) {
-        document.getElementById('orders-list').innerHTML = '<div class="alert alert-danger">Error loading orders. Please check your connection.</div>';
+        const getT = (key) => (window.i18n && window.i18n.get(key)) || key;
+        document.getElementById('orders-list').innerHTML = `<div class="alert alert-danger">${getT('orders_load_error')}. ${getT('check_connection')}.</div>`;
       }
       document.getElementById('orders-loading').style.display = 'none';
     }
@@ -84,14 +104,20 @@
     function renderOrders(orders) {
       const el = document.getElementById('orders-list');
       if (!orders.length) {
-        el.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><h3>No orders yet</h3><p>${profile.role === 'farmer' ? 'Orders from retailers will appear here.' : 'Browse the marketplace to place your first order.'}</p>${profile.role === 'retailer' ? '<a href="marketplace.html" class="btn btn-primary mt-2">🛒 Browse Marketplace</a>' : ''}</div>`;
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3 data-i18n="no_orders_yet">${getT('no_orders_yet')}</h3>
+            <p>${profile.role === 'farmer' ? getT('incoming_orders_msg') : getT('browse_marketplace_msg')}</p>
+            ${profile.role === 'retailer' ? `<a href="marketplace.html" class="btn btn-primary mt-2">🛒 ${getT('search_btn')} Marketplace</a>` : ''}
+          </div>`;
         return;
       }
 
       el.innerHTML = orders.map(o => `
         <div class="order-row status-${o.status}" id="order-${o.id}">
           <div class="flex-between mb-1">
-            <strong style="font-size:1rem;">🌿 ${o.crop_name}</strong>
+            <strong style="font-size:1rem;">🌿 ${window.i18n.getDataT(o.crop_name)}</strong>
             ${getStatusBadge(o.status)}
           </div>
           <div class="crop-meta">
@@ -101,12 +127,12 @@
           </div>
           ${profile.role === 'farmer' ? `
             <div class="text-muted" style="font-size:0.85rem;margin-top:6px;">
-              Retailer: <strong>${o.retailer_name}</strong> · 📞 ${o.retailer_phone || 'N/A'}<br>
-              📍 Deliver to: ${o.delivery_address || 'N/A'}
+              ${getT('retailer_label')}: <strong>${o.retailer_name}</strong> · 📞 ${o.retailer_phone || 'N/A'}<br>
+              📍 ${getT('deliver_to_label')}: ${o.delivery_address || 'N/A'}
             </div>
           ` : `
             <div class="text-muted" style="font-size:0.85rem;margin-top:6px;">
-              Pickup: ${o.pickup_location || 'TBD'} · Est. delivery: ${formatDate(o.estimated_delivery_date)}
+              ${getT('pickup_label')}: ${window.i18n.getDataT(o.pickup_location) || 'TBD'} · ${getT('est_delivery_label')}: ${formatDate(o.estimated_delivery_date)}
             </div>
           `}
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
@@ -117,19 +143,29 @@
       `).join('');
     }
 
+    function getStatusBadge(status) {
+      const text = getT('status_' + status);
+      return `<span class="badge badge-${status}">${text}</span>`;
+    }
+
+    function formatDate(date) {
+      if (!date) return 'TBD';
+      return new Date(date).toLocaleDateString();
+    }
+
     function getFarmerActions(o) {
       if (profile.role !== 'farmer') return '';
       if (o.status === 'pending') {
         return `
-          <button class="btn btn-success btn-sm" onclick="updateStatus('${o.id}','accepted')">✅ Accept</button>
-          <button class="btn btn-danger btn-sm" onclick="updateStatus('${o.id}','rejected')">❌ Reject</button>
+          <button class="btn btn-success btn-sm" onclick="updateStatus('${o.id}','accepted')">✅ ${getT('accept_btn')}</button>
+          <button class="btn btn-danger btn-sm" onclick="updateStatus('${o.id}','rejected')">❌ ${getT('reject_btn')}</button>
         `;
       }
       if (o.status === 'accepted') {
-        return `<button class="btn btn-sm btn-outline" onclick="updateStatus('${o.id}','in_transit')">🚚 Mark In Transit</button>`;
+        return `<button class="btn btn-sm btn-outline" onclick="updateStatus('${o.id}','in_transit')">🚚 ${getT('mark_in_transit')}</button>`;
       }
       if (o.status === 'in_transit') {
-        return `<button class="btn btn-success btn-sm" onclick="updateStatus('${o.id}','delivered')">✅ Mark Delivered</button>`;
+        return `<button class="btn btn-success btn-sm" onclick="updateStatus('${o.id}','delivered')">✅ ${getT('mark_delivered')}</button>`;
       }
       return '';
     }
@@ -137,10 +173,10 @@
     function getRetailerActions(o) {
       if (profile.role !== 'retailer') return '';
       if (o.status === 'accepted' && o.payment_status === 'unpaid') {
-        return `<a href="payment.html?orderId=${o.id}" class="btn btn-accent btn-sm">💳 Pay Now ₹${o.total_price}</a>`;
+        return `<a href="payment.html?orderId=${o.id}" class="btn btn-accent btn-sm">💳 ${getT('pay_now')} ₹${o.total_price}</a>`;
       }
       if (o.status !== 'pending' && o.status !== 'rejected') {
-        return `<a href="tracking.html?orderId=${o.id}" class="btn btn-outline btn-sm">🔍 Track Order</a>`;
+        return `<a href="tracking.html?orderId=${o.id}" class="btn btn-outline btn-sm">🔍 ${getT('track_order')}</a>`;
       }
       return '';
     }
@@ -156,6 +192,20 @@
         showAlert(e.message || 'Failed to update order.', 'error');
       }
     }
+
+    // Re-render when language changes without refresh
+    window.addEventListener('languageChanged', () => {
+      // Update page titles which are dynamic
+      if (profile.role === 'farmer') {
+        document.getElementById('page-title').textContent = getT('incoming_orders');
+        document.getElementById('page-subtitle').textContent = getT('incoming_orders_subtitle');
+      } else {
+        document.getElementById('page-title').textContent = getT('my_order_history');
+        document.getElementById('page-subtitle').textContent = getT('my_order_history_subtitle');
+      }
+      
+      if (currentOrders.length) renderOrders(currentOrders);
+    });
 
     loadOrders();
   </script>
