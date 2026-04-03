@@ -6,22 +6,28 @@
   <title>Add Crop Listing | Mandi-Connect</title>
   <meta name="description" content="Add a new crop listing for sale on Mandi-Connect.">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f3d2e">
 </head>
 <body>
 
   <nav class="navbar">
     <div class="container">
-      <div class="navbar-brand">🌾 Mandi<span>Connect</span></div>
+      <div class="navbar-brand" data-i18n="nav_brand">🌾 Mandi<span>Connect</span></div>
       <div class="navbar-links">
-        <a href="farmer-dashboard.html">← Dashboard</a>
+        <select class="i18n-select" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; margin-right: 10px; outline: none; cursor: pointer;">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        </select>
+        <a href="farmer-dashboard.html" data-i18n="dashboard_title">← Dashboard</a>
       </div>
     </div>
   </nav>
 
   <div class="page-header">
-    <h1>➕ Add Crop Listing</h1>
-    <p>Fill in the details below to list your crop</p>
+    <h1 data-i18n="add_crop_title">➕ Add Crop Listing</h1>
+    <p data-i18n="add_crop_subtitle">Fill in the details below to list your crop</p>
   </div>
 
   <main>
@@ -31,27 +37,40 @@
 
         <form id="add-crop-form" onsubmit="handleAddCrop(event)">
           <div class="form-group">
-            <label class="form-label" for="crop-name">Crop Name *</label>
+            <label class="form-label" for="crop-name" data-i18n="crop_name">Crop Name *</label>
             <select id="crop-name" class="form-control" required>
-              <option value="">Select crop type...</option>
-              <option>Wheat</option><option>Rice</option><option>Barley</option><option>Tomato</option>
-              <option>Potato</option><option>Onion</option><option>Maize</option>
-              <option>Sugarcane</option><option>Cotton</option><option>Soybean</option>
-              <option>Mustard</option><option>Groundnut</option><option>Turmeric</option>
-              <option>Chilli</option><option>Garlic</option><option>Cabbage</option>
-              <option>Cauliflower</option><option>Brinjal</option><option>Peas</option>
-              <option value="Other">Other (type below)</option>
+              <option value="" data-i18n="crop_type_placeholder">Select crop type...</option>
+              <option value="Wheat" data-i18n="Wheat">Wheat</option>
+              <option value="Rice" data-i18n="Rice">Rice</option>
+              <option value="Barley" data-i18n="Barley">Barley</option>
+              <option value="Tomato" data-i18n="Tomato">Tomato</option>
+              <option value="Potato" data-i18n="Potato">Potato</option>
+              <option value="Onion" data-i18n="Onion">Onion</option>
+              <option value="Maize" data-i18n="Maize">Maize</option>
+              <option value="Sugarcane" data-i18n="Sugarcane">Sugarcane</option>
+              <option value="Cotton" data-i18n="Cotton">Cotton</option>
+              <option value="Soybean" data-i18n="Soybean">Soybean</option>
+              <option value="Mustard" data-i18n="Mustard">Mustard</option>
+              <option value="Groundnut" data-i18n="Groundnut">Groundnut</option>
+              <option value="Turmeric" data-i18n="Turmeric">Turmeric</option>
+              <option value="Chilli" data-i18n="Chilli">Chilli</option>
+              <option value="Garlic" data-i18n="Garlic">Garlic</option>
+              <option value="Cabbage" data-i18n="Cabbage">Cabbage</option>
+              <option value="Cauliflower" data-i18n="Cauliflower">Cauliflower</option>
+              <option value="Brinjal" data-i18n="Brinjal">Brinjal</option>
+              <option value="Peas" data-i18n="Peas">Peas</option>
+              <option value="Other" data-i18n="Other">Other (type below)</option>
             </select>
           </div>
 
           <div class="form-group" id="crop-name-custom-group" style="display:none;">
-            <label class="form-label" for="crop-name-custom">Enter Crop Name *</label>
+            <label class="form-label" for="crop-name-custom" data-i18n="enter_crop_name">Enter Crop Name *</label>
             <input type="text" id="crop-name-custom" class="form-control" placeholder="e.g. Lady Finger">
           </div>
 
           <div class="grid-2">
             <div class="form-group">
-              <label class="form-label" for="quantity">Quantity (kg) *</label>
+              <label class="form-label" for="quantity" data-i18n="quantity_label">Quantity (kg) *</label>
               <input type="number" id="quantity" class="form-control" placeholder="e.g. 500" min="1" step="0.5" required>
             </div>
             <div class="form-group">
@@ -61,12 +80,12 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="harvest-date">Harvest Date</label>
+            <label class="form-label" for="harvest-date" data-i18n="harvest_date_label">Harvest Date</label>
             <input type="date" id="harvest-date" class="form-control">
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="crop-image">📸 Upload Crop Photo</label>
+            <label class="form-label" for="crop-image" data-i18n="upload_photo_label">📸 Upload Crop Photo</label>
             <input type="file" id="crop-image" class="form-control" accept="image/*" onchange="previewImage(event)">
             <div id="image-preview-container" class="mt-1 hidden" style="border: 2px dashed var(--border); padding: 10px; text-align: center; border-radius: var(--radius-sm);">
                 <img id="image-preview" src="#" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: var(--radius-sm);">
@@ -75,20 +94,20 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="description">Description (optional)</label>
-            <textarea id="description" class="form-control" rows="3" placeholder="Organic, pesticide-free, etc."></textarea>
+            <label class="form-label" for="description" data-i18n="description_label">Description (optional)</label>
+            <textarea id="description" class="form-control" rows="3" data-i18n-placeholder="description_placeholder" placeholder="Organic, pesticide-free, etc."></textarea>
           </div>
 
           <!-- Estimated total -->
           <div class="card" style="background:var(--bg);border:1px solid var(--border);margin-bottom:18px;padding:14px;">
             <div class="flex-between">
-              <span>Estimated value:</span>
+              <span data-i18n="estimated_value_label">Estimated value:</span>
               <strong id="estimated-value" style="color:var(--primary);font-size:1.1rem;">₹0</strong>
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn">📤 Publish Listing</button>
-          <p class="text-center text-muted mt-1" style="font-size:0.82rem;">If offline, listing will be saved locally and published automatically when internet reconnects.</p>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn" data-i18n="publish_btn">📤 Publish Listing</button>
+
         </form>
       </div>
     </div>
@@ -104,15 +123,16 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/api.js"></script>
+
+  <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/db.js"></script>
   <script src="js/raitha-mithra.js"></script>
   <script>
     const profile = requireAuth('farmer');
     if (!profile) throw new Error('Redirect');
 
     document.getElementById('mobile-logout').addEventListener('click', e => { e.preventDefault(); logoutUser(); });
-    setupConnectivityMonitor();
+
 
     // Show custom crop name input when "Other" selected
     document.getElementById('crop-name').addEventListener('change', function() {

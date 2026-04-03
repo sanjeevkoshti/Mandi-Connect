@@ -107,9 +107,9 @@ const RaithaMithra = {
     panel.className = 'raitha-mithra-panel';
     panel.innerHTML = `
       <div class="chat-header">
-        <strong>🤖 Raitha Mithra</strong>
+        <strong data-i18n="ai_name">🤖 Raitha Mithra</strong>
         <div style="display:flex; gap:10px; align-items:center;">
-          <span id="clear-chat">Clear</span>
+          <span id="clear-chat" data-i18n="ai_clear">Clear</span>
           <span id="close-chat" style="cursor:pointer; font-size:1.5rem;">&times;</span>
         </div>
       </div>
@@ -118,7 +118,7 @@ const RaithaMithra = {
       </div>
       <div class="chat-input-area">
         <button id="voice-btn" class="btn btn-sm" style="background:#eee; padding:5px 10px;">🎤</button>
-        <input type="text" id="chat-input" class="chat-input" placeholder="Ask anything...">
+        <input type="text" id="chat-input" class="chat-input" data-i18n-placeholder="ai_placeholder" placeholder="Ask anything...">
         <button id="send-btn" class="btn btn-primary btn-sm" style="padding:5px 12px;">Go</button>
       </div>
     `;
@@ -163,10 +163,8 @@ const RaithaMithra = {
     this.addMessage(message, 'user');
 
     try {
-      // detect basic language from message (very simplified)
-      let lang = 'en';
-      if (/[\u0C80-\u0CFF]/.test(message)) lang = 'kn'; // Kannada range
-      if (/[\u0900-\u097F]/.test(message)) lang = 'hi'; // Hindi range
+      // Use project global language if available
+      let lang = (window.i18n && window.i18n.currentLang) || 'en';
 
       const res = await api.raithaMithraChat(message, lang);
       if (res.success) {
@@ -219,7 +217,8 @@ const RaithaMithra = {
     const recentHistory = history.filter(msg => msg.time > oneHourAgo);
     
     if (recentHistory.length === 0) {
-      this.addMessage("ನಮಸ್ಕಾರ! ನಾನು ರೈತ ಮಿತ್ರ. ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ? (Hello! I am Raitha Mithra. How can I help you?)", 'ai', false);
+      const welcome = (window.i18n && window.i18n.get('ai_welcome')) || "Hello! I am Raitha Mithra. How can I help you?";
+      this.addMessage(welcome, 'ai', false);
     } else {
       recentHistory.forEach(msg => {
         this.addMessage(msg.text, msg.side, false, msg.time);
@@ -253,7 +252,12 @@ const RaithaMithra = {
 
     this.recognition = new SpeechRecognition();
     this.recognition.continuous = false;
-    this.recognition.lang = 'kn-IN'; // Default to Kannada, can be changed
+    
+    // Set voice recognition language based on global setting
+    const langIdx = { 'en': 'en-IN', 'hi': 'hi-IN', 'kn': 'kn-IN' };
+    const current = (window.i18n && window.i18n.currentLang) || 'en';
+    this.recognition.lang = langIdx[current] || 'en-IN';
+
     this.recognition.interimResults = false;
 
     this.recognition.onresult = (event) => {
@@ -288,8 +292,21 @@ const RaithaMithra = {
     else if (lang === 'hi') utterance.lang = 'hi-IN';
     else utterance.lang = 'en-IN';
     window.speechSynthesis.speak(utterance);
+  },
+
+  // Listen for global language changes
+  onLanguageChanged(lang) {
+    if (this.recognition) {
+      const langIdx = { 'en': 'en-IN', 'hi': 'hi-IN', 'kn': 'kn-IN' };
+      this.recognition.lang = langIdx[lang] || 'en-IN';
+    }
+    // Update placeholders and static text if panel is open
+    if (window.i18n) window.i18n.translatePage();
   }
 };
+
+// Global event listener
+window.addEventListener('languageChanged', (e) => RaithaMithra.onLanguageChanged(e.detail));
 
 // Initialize after page load
 window.addEventListener('load', () => RaithaMithra.init());

@@ -98,6 +98,10 @@ img { max-width: 100%; height: auto; }
   color: white;
   text-decoration: none;
 }
+.i18n-select option {
+  color: var(--text);
+  background-color: var(--bg-card);
+}
 .offline-badge {
   background: var(--warning);
   color: #fff;
