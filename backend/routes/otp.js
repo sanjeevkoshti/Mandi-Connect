@@ -15,7 +15,9 @@ const SMTP_PASSWORD = process.env.SMTP_PASSWORD || '';
 // Create transporter with explicit settings for better reliability in cloud environments
 function createTransporter() {
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: SMTP_EMAIL,
       pass: SMTP_PASSWORD
@@ -153,7 +155,7 @@ router.post('/send', async (req, res) => {
       
       return res.status(500).json({
         success: false,
-        error: 'Failed to send OTP email. Please try again later.'
+        error: `Email failed: ${emailErr.message}`
       });
     }
 
