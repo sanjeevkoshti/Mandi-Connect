@@ -12,10 +12,18 @@ const spoilageRouter = require('./routes/spoilage');
 const otpRouter = require('./routes/otp');
 
 const app = express();
-let PORT = process.env.PORT || 3002;
-if (PORT == 3000) PORT = 3002; // Avoid Vite conflict if PORT=3000 is inherited from env
+const PORT = process.env.PORT || 3002;
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://agri-mitra-alpha.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
