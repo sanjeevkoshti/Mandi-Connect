@@ -15,15 +15,16 @@ const Home = () => {
           <img 
             src="/hero_bg_farming_1775384457320.png" 
             alt="Sustainable Farming" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover blur-[1.5px] scale-[1.02]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/80 via-primary-dark/40 to-slate-50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/40 via-transparent to-transparent" />
         </div>
 
         {/* Animated Blobs */}
         <div className="hero-blob w-[500px] h-[500px] bg-primary top-[-10%] right-[-10%] animate-pulse-slow" />
         <div className="hero-blob w-[400px] h-[400px] bg-accent bottom-[-5%] left-[-5%] animate-float" />
 
+        {/* Hero Content */}
         <div className="container relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
             <span className="flex h-2 w-2 rounded-full bg-accent animate-pulse" />
@@ -33,50 +34,52 @@ const Home = () => {
           <h1 className="text-5xl md:text-7xl font-heading font-extrabold mb-6 text-white leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
             {t('hero_title')} <br />
             <span className="text-accent underline decoration-accent/30 decoration-8 underline-offset-8">
-              {t('hero_subtitle').split(' ')[0] || 'Directly'}
+              {t('hero_subtitle')}
             </span>
           </h1>
           
-          <p className="text-xl text-white/80 max-w-2xl mx-auto mb-12 font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-            Connecting farmers to retailers through an AI-powered marketplace. Fair prices, instant payments, and zero middlemen.
+          <p className="text-xl text-white max-w-2xl mx-auto mb-12 font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+            {t('hero_desc')}
           </p>
           
           <div className="flex flex-wrap justify-center gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
             <Link to="/login?role=farmer" className="group btn btn-accent px-10 py-4 text-lg shadow-xl shadow-accent/20">
               <Sprout className="w-6 h-6 mr-2 transition-transform group-hover:rotate-12" /> 
-              {t('im_farmer')}
+              {t('iam_farmer')}
               <ArrowRight className="w-5 h-5 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
             </Link>
             <Link to="/login?role=retailer" className="group btn btn-outline border-white/30 text-white hover:bg-white hover:text-primary-dark px-10 py-4 text-lg backdrop-blur-sm">
               <ShoppingBag className="w-6 h-6 mr-2 transition-transform group-hover:scale-110" /> 
-              {t('im_retailer')}
+              {t('iam_retailer')}
             </Link>
           </div>
         </div>
 
-        {/* Stats Overlap */}
-        <div className="absolute bottom-10 left-0 right-0 transform translate-y-1/2">
-          <div className="container">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <StatCard value="0%" label={t('commission_charged')} icon={<TrendingUp className="w-6 h-6" />} />
-              <StatCard value="UPI" label={t('instant_payments')} icon={<Zap className="w-6 h-6" />} />
-              <StatCard value="24/7" label="AI Assistance" icon={<Bot className="w-6 h-6" />} />
-            </div>
-          </div>
+        {/* Wave Transition Divider */}
+        <div className="absolute bottom-[-1px] left-0 w-full overflow-hidden leading-[0] transform rotate-180">
+          <svg className="relative block w-[calc(100%+1.3px)] h-[80px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#eff6f1"></path>
+          </svg>
         </div>
       </section>
 
       {/* Trust Section */}
-      <section className="pt-24 pb-16 bg-slate-50 border-b border-slate-200">
+      <section className="pt-20 pb-16 bg-[#eff6f1] border-b border-primary/5">
         <div className="container">
-          <p className="text-center text-slate-400 uppercase tracking-[0.2em] font-bold text-xs mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16 px-4">
+            <StatCard value="0%" label={t('commission_charged')} icon={<TrendingUp className="w-6 h-6" />} />
+            <StatCard value="UPI" label={t('instant_payments')} icon={<Zap className="w-6 h-6" />} />
+            <StatCard value="24/7" label="AI Assistance" icon={<Bot className="w-6 h-6" />} />
+          </div>
+
+          <p className="text-center text-primary-dark/40 uppercase tracking-[0.2em] font-bold text-xs mb-12">
             Trusted by modern agricultural communities
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
-            <div className="text-2xl font-black text-slate-600">AGROTEK</div>
-            <div className="text-2xl font-black text-slate-600">FARMHUB</div>
-            <div className="text-2xl font-black text-slate-600">SMARTMANDI</div>
-            <div className="text-2xl font-black text-slate-600">GREENPAY</div>
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
+            <div className="text-2xl font-black text-primary-dark/30">AGROTEK</div>
+            <div className="text-2xl font-black text-primary-dark/30">FARMHUB</div>
+            <div className="text-2xl font-black text-primary-dark/30">SMARTMANDI</div>
+            <div className="text-2xl font-black text-primary-dark/30">GREENPAY</div>
           </div>
         </div>
       </section>
