@@ -15,16 +15,17 @@ const SMTP_PASSWORD = process.env.SMTP_PASSWORD || '';
 // Create transporter with explicit settings for better reliability in cloud environments
 function createTransporter() {
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    service: 'gmail',
     auth: {
       user: SMTP_EMAIL,
       pass: SMTP_PASSWORD
     },
     tls: {
       rejectUnauthorized: false
-    }
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
   });
 }
 
