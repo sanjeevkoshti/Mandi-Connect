@@ -12,13 +12,19 @@ const SMTP_EMAIL = process.env.SMTP_EMAIL || '';
 const SMTP_PASSWORD = process.env.SMTP_PASSWORD || '';
 
 // Create transporter
+// Create transporter with explicit settings for better reliability in cloud environments
 function createTransporter() {
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // use SSL
     auth: {
       user: SMTP_EMAIL,
       pass: SMTP_PASSWORD
-    }
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 15000
   });
 }
 
@@ -140,7 +146,12 @@ router.post('/send', async (req, res) => {
       });
 
     } catch (emailErr) {
-      console.error('[OTP] Email send error:', emailErr.message);
+      console.error('[OTP] ❌ Email send error details:', {
+        message: emailErr.message,
+        code: emailErr.code,
+        command: emailErr.command,
+        response: emailErr.response
+      });
       
       // Fallback for development/demo: if email fails, still "succeed" but show OTP in message
       console.warn(`[OTP] ⚠️ FALLBACK: Could not send real email. Your OTP for ${emailKey} is: ${otp}`);
