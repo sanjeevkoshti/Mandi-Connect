@@ -22,7 +22,7 @@ function createTransporter() {
 }
 
 /**
- * REGISTER: Save user data after OTP verification
+ * REGISTER: Save user data directly
  */
 router.post('/register', async (req, res) => {
   try {

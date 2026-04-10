@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { User, Lock, Mail, Phone, MapPin, ArrowRight, CheckCircle, ShieldCheck } from 'lucide-react';
+import { User, Lock, Mail, Phone, MapPin, ArrowRight, ShieldCheck } from 'lucide-react';
 import { api } from '../services/api';
 import { useI18n } from '../context/I18nContext';
 
@@ -12,16 +12,14 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', location: '', password: '', otp: ''
+    name: '', email: '', phone: '', location: '', password: ''
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  // Registration OTP States
-  const [otpSent, setOtpSent] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
+  // Registration States
   const [fieldErrors, setFieldErrors] = useState({});
 
   const validateEmail = (email) => {
@@ -75,47 +73,11 @@ const Login = () => {
     }
   };
 
-  const handleSendOTP = async () => {
-    if (!formData.email) return setError('Please enter your email address first.');
-    clearMessages();
-    setLoading(true);
-    
-    console.log(`[AUTH] Sending OTP to ${formData.email}...`);
-    const res = await api.sendOTP(formData.email, 'register');
-    setLoading(false);
-    
-    if (res.success) {
-      setOtpSent(true);
-      setSuccess(res.message || t('enter_otp_msg') || 'OTP sent to your email.');
-      console.log(`[AUTH] OTP Success:`, res.message);
-    } else {
-      setError(res.error || 'Could not send OTP.');
-      console.error(`[AUTH] OTP Error:`, res.error);
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    if (formData.otp.length !== 6) return setError('Enter standard 6-digit OTP.');
-    clearMessages();
-    setLoading(true);
-    const res = await api.verifyOTP(formData.email, formData.otp);
-    setLoading(false);
-    
-    if (res.success) {
-      setEmailVerified(true);
-      setOtpSent(false);
-      setSuccess(t('email_verified_msg') || 'Email verified successfully!');
-    } else {
-      setError(res.error || t('err_invalid_otp') || 'Invalid OTP.');
-    }
-  };
-
   const handleRegister = async (e) => {
     e.preventDefault();
     const errors = {};
     if (!formData.name) errors.name = 'Full name is required.';
     if (!validateEmail(formData.email)) errors.email = 'Invalid email.';
-    if (!emailVerified) errors.email = 'Please verify email first.';
     if (!formData.phone || formData.phone.length < 10) errors.phone = 'Invalid phone number.';
     if (!formData.location) errors.location = 'Location is required.';
     if (formData.password.length < 6) errors.password = 'Password must be at least 6 characters.';
@@ -239,34 +201,16 @@ const Login = () => {
               </div>
             )}
 
-            <div className="relative flex gap-2">
-              <div className="relative flex-grow">
-                <Mail className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted/60" />
-                <input 
-                  name="email" type="email" placeholder={t('email_label')} required disabled={emailVerified && view === 'register'}
-                  className={`w-full pl-10 pr-4 py-3 rounded-small border-2 ${fieldErrors.email ? 'border-red-500' : 'border-primary/10'} focus:border-primary outline-none transition-all disabled:opacity-50 font-bold`}
-                  value={formData.email} 
-                  onChange={(e) => { handleChange(e); if (fieldErrors.email) setFieldErrors({...fieldErrors, email: null}); }}
-                />
-              </div>
-              {view === 'register' && !emailVerified && (
-                <button type="button" onClick={handleSendOTP} disabled={loading || !formData.email} className="btn btn-outline text-[10px] font-black uppercase px-4 whitespace-nowrap h-[52px]">
-                  {t('send_otp')}
-                </button>
-              )}
-              {view === 'register' && emailVerified && (
-                <div className="btn text-white bg-success px-4 flex items-center justify-center cursor-default pointer-events-none h-[52px]"><CheckCircle className="w-5 h-5"/></div>
-              )}
+            <div className="relative">
+              <Mail className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted/60" />
+              <input 
+                name="email" type="email" placeholder={t('email_label')} required
+                className={`w-full pl-10 pr-4 py-3 rounded-small border-2 ${fieldErrors.email ? 'border-red-500' : 'border-primary/10'} focus:border-primary outline-none transition-all font-bold`}
+                value={formData.email} 
+                onChange={(e) => { handleChange(e); if (fieldErrors.email) setFieldErrors({...fieldErrors, email: null}); }}
+              />
             </div>
             {fieldErrors.email && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-widest pl-2">{fieldErrors.email}</p>}
-
-            {view === 'register' && otpSent && !emailVerified && (
-              <div className="p-3 bg-bg rounded-small border border-primary/20 flex gap-2 animate-in slide-in-from-top-2 duration-300">
-                <input name="otp" type="text" placeholder="OTP" maxLength="6" className="flex-grow pl-3 py-2 rounded-small border border-primary/10 focus:border-primary tracking-[0.5em] font-black text-center outline-none" value={formData.otp} onChange={handleChange} />
-                <button type="button" onClick={handleVerifyOTP} disabled={loading || !formData.otp} className="btn btn-primary px-6 whitespace-nowrap text-xs font-black uppercase">{t('verify_otp')}</button>
-              </div>
-            )}
-
             {view === 'register' && (
               <>
                 <div className="relative">
@@ -309,7 +253,7 @@ const Login = () => {
               </div>
             )}
 
-            <button type="submit" disabled={loading || (view === 'register' && !emailVerified)} className="w-full btn btn-primary py-4 mt-4 font-black uppercase tracking-widest items-center justify-center gap-2 flex disabled:opacity-50 text-base shadow-hard">
+            <button type="submit" disabled={loading} className="w-full btn btn-primary py-4 mt-4 font-black uppercase tracking-widest items-center justify-center gap-2 flex disabled:opacity-50 text-base shadow-hard">
               {loading ? (t('processing') || 'Processing...') : view === 'login' ? t('login_btn') : t('create_account')} <ArrowRight className="w-6 h-6" />
             </button>
           </form>
