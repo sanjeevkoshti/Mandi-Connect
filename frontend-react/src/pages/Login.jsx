@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Lock, Mail, Phone, MapPin, ArrowRight, ShieldCheck } from 'lucide-react';
 import { api } from '../services/api';
 import { useI18n } from '../context/I18nContext';
+import loginHeroImg from '../assets/login-hero.png';
 
 const Login = () => {
   const { t } = useI18n();
@@ -140,14 +141,14 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-slate-900 justify-center">
         <div className="absolute inset-0 z-0">
           <img 
-            src="/src/assets/login-hero.png" 
+            src={loginHeroImg} 
             alt="Modern Agriculture" 
             className="w-full h-full object-cover opacity-60 mix-blend-overlay hover:scale-110 transition-transform duration-[20s] ease-in-out" 
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-primary-dark/95 via-primary-dark/60 to-transparent"></div>
         </div>
 
-        <div className="relative z-10 w-full max-w-lg flex flex-col justify-center p-12 h-full">
+        <div className="relative z-10 w-full max-w-lg flex flex-col justify-center p-12 pt-28 h-full">
           <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 w-fit">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
