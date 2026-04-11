@@ -135,7 +135,7 @@
   "status_pending": "Pending",
   "status_accepted": "Accepted",
   "status_rejected": "Rejected",
-  "status_in_transit": "In Transit",
+  "status_transit": "In Transit",
   "status_delivered": "Delivered",
   "success_label": "Success",
   "enter_otp_msg": "Enter 6-digit OTP",

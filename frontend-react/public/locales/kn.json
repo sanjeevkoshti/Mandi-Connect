@@ -135,7 +135,7 @@
   "status_pending": "ಬಾಕಿ ಉಳಿದಿದೆ",
   "status_accepted": "ಒಪ್ಪಲಾಗಿದೆ",
   "status_rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
-  "status_in_transit": "ಹಾದಿಯಲ್ಲಿದೆ",
+  "status_transit": "ಹಾದಿಯಲ್ಲಿದೆ",
   "status_delivered": "ತಲುಪಿಸಲಾಗಿದೆ",
   "success_label": "ಯಶಸ್ವಿ",
   "enter_otp_msg": "6 ಅಂಕಿಗಳ OTP",

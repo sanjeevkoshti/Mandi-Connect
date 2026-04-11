@@ -48,6 +48,8 @@ const Orders = () => {
     const res = await api.updateOrder(orderId, { status: newStatus });
     if (res.success) {
       fetchOrders();
+    } else {
+      alert("Error updating order: " + res.error);
     }
   };
 

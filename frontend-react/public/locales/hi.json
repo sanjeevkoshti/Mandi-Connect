@@ -135,7 +135,7 @@
   "status_pending": "लंबित",
   "status_accepted": "स्वीकृत",
   "status_rejected": "अस्वीकृत",
-  "status_in_transit": "ट्रांजिट में",
+  "status_transit": "ट्रांजिट में",
   "status_delivered": "डिलीवर",
   "success_label": "सफलता",
   "enter_otp_msg": "6-अंकीय OTP",
