@@ -22,7 +22,7 @@ const App = () => {
   const isFullscreenPage = ['/', '/login', '/reset-password'].includes(location.pathname);
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-primary selection:text-white">
+    <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-primary selection:text-white overflow-x-hidden relative">
       <Navbar />
       <main className={`flex-grow ${!isFullscreenPage ? 'pt-20' : ''}`}>
         <Routes>

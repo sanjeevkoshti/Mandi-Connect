@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Globe, LogIn, Menu, X, ChevronDown } from 'lucide-react';
+import { Globe, LogIn, Menu, X, ChevronDown, Home, ShoppingBag, Leaf, Brain, LayoutDashboard } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import NotificationCenter from './NotificationCenter';
 
@@ -51,11 +51,12 @@ const Navbar = () => {
   const isHomePage = location.pathname === '/';
 
   return (
+    <>
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${(isScrolled || !isHomePage || isMobileMenuOpen)
         ? "bg-white/90 backdrop-blur-xl border-b border-slate-200 py-3 shadow-premium text-slate-900"
         : "bg-transparent py-5 text-white"
       }`}>
-      <div className="container px-4 md:px-8 flex items-center justify-between">
+      <div className="container flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 md:w-12 md:h-12 transition-all duration-500 group-hover:scale-110 drop-shadow-md">
             <img src="/logo.png" alt="Agri Mitra Logo" className="w-full h-full object-cover rounded-xl md:rounded-2xl" />
@@ -78,20 +79,20 @@ const Navbar = () => {
             <div className="flex items-center gap-8">
               {profile.role === 'farmer' ? (
                 <>
-                  <Link to="/farmer-dash" className={navItemClass}>{t('dashboard')}<span className={navItemActiveLine} /></Link>
-                  <Link to="/add-crop" className={navItemClass}>{t('add_crop_btn')}<span className={navItemActiveLine} /></Link>
-                  <Link to="/spoilage-rescue" className="text-sm font-bold flex items-center gap-2 bg-red-500/10 text-red-500 px-4 py-1.5 rounded-full hover:bg-red-500 hover:text-white transition-all">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> Rescue
+                  <Link to="/farmer-dash" className={navItemClass}>{t('nav_dashboard')}<span className={navItemActiveLine} /></Link>
+                  <Link to="/add-crop" className={navItemClass}>{t('list_crops')}<span className={navItemActiveLine} /></Link>
+                  <Link to="/spoilage-rescue" className="text-sm font-bold flex items-center gap-2 bg-red-500/10 text-red-500 px-4 py-1.5 rounded-full hover:bg-red-50 rounded-full transition-all border border-red-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> {t('nav_rescue')}
                   </Link>
-                  <Link to="/ai-predictor" className={navItemClass}>{t('ai_predictor')}<span className={navItemActiveLine} /></Link>
-                  <Link to="/orders" className={navItemClass}>{t('orders')}<span className={navItemActiveLine} /></Link>
+                  <Link to="/ai-predictor" className={navItemClass}>{t('nav_ai_predictor')}<span className={navItemActiveLine} /></Link>
+                  <Link to="/orders" className={navItemClass}>{t('nav_orders')}<span className={navItemActiveLine} /></Link>
                 </>
               ) : (
                 <>
-                  <Link to="/marketplace" className={navItemClass}>{t('marketplace')}<span className={navItemActiveLine} /></Link>
-                  <Link to="/spoilage-rescue" className={navItemClass}>{t('rescue')}<span className={navItemActiveLine} /></Link>
-                  <Link to="/ai-predictor" className={navItemClass}>{t('ai_predictor')}<span className={navItemActiveLine} /></Link>
-                  <Link to="/orders" className={navItemClass}>{t('my_orders') || 'My Orders'}<span className={navItemActiveLine} /></Link>
+                  <Link to="/marketplace" className={navItemClass}>{t('nav_marketplace')}<span className={navItemActiveLine} /></Link>
+                  <Link to="/spoilage-rescue" className={navItemClass}>{t('nav_rescue')}<span className={navItemActiveLine} /></Link>
+                  <Link to="/ai-predictor" className={navItemClass}>{t('nav_ai_predictor')}<span className={navItemActiveLine} /></Link>
+                  <Link to="/orders" className={navItemClass}>{t('nav_orders')}<span className={navItemActiveLine} /></Link>
                 </>
               )}
             </div>
@@ -153,73 +154,115 @@ const Navbar = () => {
         {/* Mobile Menu Toggle */}
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2 relative z-[60]"
+          className={`lg:hidden p-2 relative z-[110] transition-colors ${isMobileMenuOpen ? "text-slate-900" : (isScrolled || !isHomePage ? "text-slate-900" : "text-white")}`}
         >
-          {isMobileMenuOpen ? (
-            <X className="w-6 h-6 text-slate-900" />
-          ) : (
-            <Menu className={`w-6 h-6 ${(isScrolled || !isHomePage) ? "text-slate-900" : "text-white"}`} />
-          )}
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
-      {/* Mobile Drawer */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-0 bg-white z-[55] pt-24 px-4 pb-8 overflow-y-auto animate-in slide-in-from-right duration-300">
+    </nav>
+    
+    {/* Mobile Menu Backdrop */}
+    {isMobileMenuOpen && (
+      <div 
+        className="lg:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[90] transition-opacity duration-300"
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+    )}
+
+    {/* Mobile Drawer */}
+    {isMobileMenuOpen && (
+      <div className="lg:hidden fixed top-0 right-0 bottom-0 w-[280px] bg-white z-[100] shadow-[-10px_0_30px_-5px_rgba(0,0,0,0.1)] border-l border-slate-100 animate-slide-in-right flex flex-col">
+        {/* Internal Close Button */}
+        <button 
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-900 transition-colors"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        <div className="flex flex-col h-full pt-16 px-6 pb-8 overflow-y-auto">
           <div className="flex flex-col gap-1">
              <div className="mb-4 px-2">
-                <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-4">{t('menu') || 'Navigation'}</div>
-                <div className="flex flex-col gap-2">
-                  <Link to="/" className="text-xl font-black text-slate-800 p-2 hover:bg-slate-50 rounded-xl">{t('nav_home')}</Link>
-                  <Link to="/marketplace" className="text-xl font-black text-slate-800 p-2 hover:bg-slate-50 rounded-xl">{t('marketplace')}</Link>
-                  <Link to="/spoilage-rescue" className="text-xl font-black text-slate-800 p-2 hover:bg-slate-50 rounded-xl">{t('rescue')}</Link>
-                  <Link to="/ai-predictor" className="text-xl font-black text-slate-800 p-2 hover:bg-slate-50 rounded-xl">{t('ai_predictor') || 'AI Predictor'}</Link>
-                  {profile?.role === 'farmer' && <Link to="/farmer-dash" className="text-xl font-black text-slate-800 p-2 hover:bg-slate-50 rounded-xl">{t('dashboard')}</Link>}
+                <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-6">{t('menu') || 'Navigation'}</div>
+                <div className="flex flex-col gap-3">
+                  <Link to="/" className="text-lg font-bold text-slate-900 p-2 hover:bg-slate-50 rounded-xl flex items-center gap-3">
+                    <Home className="w-5 h-5 text-primary" /> {t('nav_home')}
+                  </Link>
+                  <Link to="/marketplace" className="text-lg font-bold text-slate-900 p-2 hover:bg-slate-50 rounded-xl flex items-center gap-3">
+                    <ShoppingBag className="w-5 h-5 text-primary" /> {t('nav_marketplace')}
+                  </Link>
+                  <Link to="/spoilage-rescue" className="text-lg font-bold text-slate-900 p-2 hover:bg-slate-50 rounded-xl flex items-center gap-3">
+                    <Leaf className="w-5 h-5 text-red-500" /> {t('nav_rescue')}
+                  </Link>
+                  <Link to="/ai-predictor" className="text-lg font-bold text-slate-900 p-2 hover:bg-slate-50 rounded-xl flex items-center gap-3">
+                    <Brain className="w-5 h-5 text-accent" /> {t('nav_ai_predictor')}
+                  </Link>
+                  {profile?.role === 'farmer' && (
+                    <Link to="/farmer-dash" className="text-lg font-bold text-slate-900 p-2 hover:bg-slate-50 rounded-xl flex items-center gap-3">
+                      <LayoutDashboard className="w-5 h-5 text-primary" /> {t('nav_dashboard')}
+                    </Link>
+                  )}
                 </div>
              </div>
 
-             <div className="mt-4 pt-8 border-t border-slate-100 flex flex-col gap-6">
+             <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col gap-8">
                 <div className="px-2">
-                  <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-3">{t('settings') || 'Settings'}</div>
-                   <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                      <span className="font-bold text-slate-600">{t('language') || 'Language'}</span>
-                      <div className="flex gap-2">
-                        {['en', 'hi', 'kn'].map(l => (
-                          <button 
-                            key={l} 
-                            onClick={() => setLanguage(l)}
-                            className={`px-3 py-1 rounded-lg text-xs font-black uppercase ${lang === l ? 'bg-primary text-white' : 'bg-white text-slate-400 border border-slate-200'}`}
-                          >
-                            {l}
-                          </button>
-                        ))}
+                  <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-4">{t('settings') || 'Settings'}</div>
+                   <div className="flex flex-col gap-3">
+                      <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-200/50 shadow-sm">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Globe className="w-4 h-4 text-primary" />
+                          </div>
+                          <span className="font-black text-slate-800 text-xs uppercase tracking-widest">{t('language') || 'Language'}</span>
+                        </div>
+                        <div className="flex p-1 bg-white border border-slate-100 rounded-2xl shadow-inner gap-1">
+                          {['en', 'hi', 'kn'].map(l => (
+                            <button 
+                              key={l} 
+                              onClick={() => setLanguage(l)}
+                              className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all duration-300 ${lang === l 
+                                ? 'bg-primary text-white shadow-lg' 
+                                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                            >
+                              {l}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                    </div>
                 </div>
 
                 <div className="px-2 mt-auto">
                    {profile ? (
-                     <div className="p-4 bg-slate-900 rounded-2xl flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-black text-sm">
+                     <div className="p-5 bg-slate-900 rounded-[2.5rem] flex items-center justify-between shadow-2xl shadow-slate-900/40 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
+                        <div className="flex items-center gap-4 relative z-10 overflow-hidden">
+                           <div className="w-12 h-12 flex-shrink-0 rounded-2xl bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center text-white font-black text-sm border-2 border-slate-700 shadow-lg">
                              {getInitials(profile.full_name || profile.name)}
                            </div>
-                           <div>
-                              <div className="text-white font-bold truncate max-w-[120px]">{profile.full_name || profile.name}</div>
-                              <div className="text-[10px] text-accent font-black uppercase tracking-widest">{profile.role}</div>
+                           <div className="overflow-hidden">
+                              <div className="text-white font-black text-base truncate leading-tight tracking-tight">{profile.full_name || profile.name}</div>
+                              <div className="text-[10px] text-accent font-black uppercase tracking-[0.2em] mt-1">{profile.role}</div>
                            </div>
                         </div>
-                        <button onClick={handleLogout} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg"><LogIn className="w-5 h-5 rotate-180" /></button>
+                        <button onClick={handleLogout} className="p-3 text-red-400 hover:bg-red-500/20 rounded-2xl transition-all relative z-10 active:scale-95" title="Logout">
+                          <LogIn className="w-5 h-5 rotate-180" />
+                        </button>
                      </div>
                    ) : (
-                     <Link to="/login" className="btn btn-primary w-full py-4 text-sm font-black uppercase tracking-widest shadow-hard">{t('nav_login')}</Link>
+                     <Link to="/login" className="btn btn-primary w-full py-5 text-xs font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 rounded-[2rem] flex items-center justify-center gap-4 hover:-translate-y-1 transition-all">
+                       <LogIn className="w-5 h-5" /> {t('nav_login')}
+                     </Link>
                    )}
                 </div>
              </div>
           </div>
         </div>
-      )}
-    </nav>
+      </div>
+    )}
+    </>
   );
 };
 

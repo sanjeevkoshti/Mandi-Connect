@@ -202,7 +202,7 @@ const OrderDetail = () => {
   const totalAmount = order.total_price || (order.quantity_kg * order.price_per_kg) || 0;
 
   return (
-    <div className="container mx-auto py-12 px-4 pb-32 relative">
+    <div className="container mx-auto py-12 px-4 pb-32 relative overflow-hidden">
       <div className="hero-blob w-[500px] h-[500px] bg-primary-light -top-48 -left-48"></div>
       <div className="hero-blob w-[400px] h-[400px] bg-accent -top-24 -right-24 opacity-10"></div>
 

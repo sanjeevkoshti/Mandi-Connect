@@ -215,7 +215,7 @@ const RaithaMithra = () => {
   return (
     <>
       <button 
-        className={`fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-hard z-50 transition-all ${isRecording ? 'animate-pulse bg-danger ring-4 ring-danger/30' : 'hover:scale-110 border-2 border-white'}`}
+        className={`fixed bottom-4 md:bottom-6 right-4 md:right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-hard z-[100] transition-all ${isRecording ? 'animate-pulse bg-danger ring-4 ring-danger/30' : 'hover:scale-110 border-2 border-white'}`}
         onClick={() => setIsOpen(!isOpen)}
         title={t('ai_name') || "AI Assistant"}
       >
@@ -223,7 +223,7 @@ const RaithaMithra = () => {
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-80 max-w-[calc(100vw-3rem)] bg-white rounded-large shadow-hard z-50 flex flex-col border border-primary/10 overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-300 h-96">
+        <div className="fixed bottom-20 md:bottom-24 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-80 max-w-sm bg-white rounded-large shadow-hard z-[100] flex flex-col border border-primary/10 overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-300 h-96 max-h-[70vh]">
           <div className="bg-primary-dark text-white p-3 flex justify-between items-center">
             <span className="font-bold flex items-center gap-2"><Bot className="w-5 h-5"/> {t('ai_name') || "Raitha Mithra"}</span>
             <div className="flex gap-2">

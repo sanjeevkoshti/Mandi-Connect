@@ -262,7 +262,7 @@ const FarmerDashboard = () => {
   if (loading) return <div className="p-20 text-center text-primary font-bold">{t('analyzing_data') || 'Loading Dashboard...'}</div>;
 
   return (
-    <div className="container mx-auto py-12 px-4 relative">
+    <div className="container mx-auto py-12 px-4 relative overflow-hidden">
       {/* Decorative Background Elements */}
       <div className="hero-blob w-[500px] h-[500px] bg-primary -top-48 -left-48"></div>
       <div className="hero-blob w-[400px] h-[400px] bg-accent -bottom-48 -right-48 opacity-10"></div>
@@ -277,7 +277,7 @@ const FarmerDashboard = () => {
         <div className="flex flex-wrap gap-3">
           <Link to="/ai-predictor" className="btn btn-outline border-primary/20 bg-white/50 backdrop-blur-sm group px-8">
             <TrendingUp className="w-5 h-5 group-hover:scale-110 transition-transform" /> 
-            <span className="font-bold">{t('ai_predictor_btn')}</span>
+            <span className="font-bold">{t('nav_ai_predictor')}</span>
           </Link>
           <Link to="/add-crop" className="btn btn-primary px-8 shadow-xl shadow-primary/20">
             <Plus className="w-5 h-5" /> 

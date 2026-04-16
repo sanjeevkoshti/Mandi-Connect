@@ -178,7 +178,7 @@ const AiPredictor = () => {
   };
 
   return (
-    <div className="min-h-screen text-text pb-24">
+    <div className="min-h-screen text-text pb-24 overflow-hidden">
       
       {/* ── Hero Header ─────────────────────────────────────────────── */}
       <div className="relative pt-16 pb-28 px-4 overflow-hidden">
@@ -202,10 +202,10 @@ const AiPredictor = () => {
           <div className="max-w-2xl mx-auto relative z-30">
             <form onSubmit={handlePredict} noValidate className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-primary-light/30 rounded-full blur opacity-50 group-focus-within:opacity-100 transition duration-500" />
-              <div className="relative flex items-center bg-white border border-slate-200 rounded-full shadow-premium overflow-hidden p-1.5 focus-within:border-primary transition-all">
-                <Search className={`w-6 h-6 ml-6 flex-shrink-0 ${error ? 'text-danger' : 'text-slate-400'}`} />
+              <div className="relative flex items-center bg-white border border-slate-200 rounded-full shadow-premium overflow-hidden p-1 sm:p-1.5 focus-within:border-primary transition-all">
+                <Search className={`w-5 h-5 ml-4 sm:ml-6 flex-shrink-0 ${error ? 'text-danger' : 'text-slate-400'}`} />
                 <input 
-                  className="flex-grow bg-transparent px-4 py-4 outline-none font-bold text-text placeholder:text-slate-400"
+                  className="flex-grow bg-transparent px-2 sm:px-4 py-3 sm:py-4 outline-none font-bold text-sm sm:text-base text-text placeholder:text-slate-400 min-w-0"
                   placeholder={t('select_crop_placeholder')}
                   value={crop}
                   onChange={(e) => { setCrop(e.target.value); setShowDropdown(true); if (error) setError(false); }}
@@ -213,8 +213,15 @@ const AiPredictor = () => {
                   onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                 />
                 <button type="submit" disabled={loading}
-                  className="btn btn-primary h-12 px-8 rounded-full flex items-center gap-2">
-                  {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <><Zap className="w-4 h-4 fill-white" />{t('generate_pred_btn') || 'Analyze'}</>}
+                  className="btn btn-primary h-10 sm:h-12 px-4 sm:px-8 rounded-full flex items-center gap-2 flex-shrink-0">
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 fill-white flex-shrink-0" />
+                      <span className="hidden sm:inline">{t('generate_pred_btn') || 'Analyze'}</span>
+                    </>
+                  )}
                 </button>
               </div>
               {showDropdown && filteredCrops.length > 0 && (

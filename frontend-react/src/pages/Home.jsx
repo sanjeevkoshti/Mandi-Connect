@@ -69,7 +69,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16 px-4">
             <StatCard value="0%" label={t('commission_charged')} icon={<TrendingUp className="w-6 h-6" />} />
             <StatCard value="UPI" label={t('instant_payments')} icon={<Zap className="w-6 h-6" />} />
-            <StatCard value="24/7" label="AI Assistance" icon={<Bot className="w-6 h-6" />} />
+            <StatCard value="24/7" label={t('ai_support') || "AI Assistance"} icon={<Bot className="w-6 h-6" />} />
           </div>
 
           <p className="text-center text-primary-dark/40 uppercase tracking-[0.2em] font-bold text-xs mb-12">
@@ -78,7 +78,7 @@ const Home = () => {
           <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
             <div className="text-2xl font-black text-primary-dark/30">AGROTEK</div>
             <div className="text-2xl font-black text-primary-dark/30">FARMHUB</div>
-            <div className="text-2xl font-black text-primary-dark/30">AGRI MITRA</div>
+            <div className="text-2xl font-black text-primary-dark/30">{t('nav_brand').split(' ')[0]}</div>
             <div className="text-2xl font-black text-primary-dark/30">GREENPAY</div>
           </div>
         </div>

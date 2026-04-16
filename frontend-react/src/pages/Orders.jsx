@@ -71,7 +71,7 @@ const Orders = () => {
   if (loading) return <div className="p-20 text-center text-primary font-bold">{t('loading_orders') || 'Loading Orders...'}</div>;
 
   return (
-    <div className="container mx-auto py-12 px-4 relative">
+    <div className="container mx-auto py-12 px-4 relative overflow-hidden">
       <div className="hero-blob w-[400px] h-[400px] bg-primary -top-48 -right-48 opacity-10"></div>
       
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
