@@ -39,6 +39,7 @@ router.get('/razorpay/onboard-status/:farmerId', async (req, res) => {
     res.json({ 
       success: true, 
       onboarded: !!(data && data.razorpay_account_id),
+      is_simulated: !!(data && data.razorpay_account_id && data.razorpay_account_id.startsWith('acc_simulated')),
       data: data || null
     });
   } catch (err) {
@@ -64,8 +65,8 @@ router.post('/razorpay/onboard-farmer', async (req, res) => {
     }
 
     // Create Linked Account in Razorpay
-    // For demo, if keys are test-keys, we might use a simulated ID.
-    let accountId = `acc_simulated_${farmer_id.slice(0,8)}`;
+    const isLive = process.env.RAZORPAY_KEY_ID?.startsWith('rzp_live');
+    let accountId = null;
     
     try {
       const account = await razorpay.accounts.create({
@@ -76,7 +77,17 @@ router.post('/razorpay/onboard-farmer', async (req, res) => {
       });
       accountId = account.id;
     } catch (rzpErr) {
-       console.log('[Payments] Razorpay Account creation failed (Expected in demo). Using simulated ID.', rzpErr.message);
+       const errMsg = rzpErr.description || rzpErr.message || 'Unknown Razorpay Error';
+       if (global.serverLog) {
+         global.serverLog(`❌ [Payments] Razorpay Account creation failed: ${errMsg}`);
+       }
+       
+      // Fallback: Always allow simulated ID for demo/testing if API fails
+      accountId = `acc_simulated_${farmer_id.slice(0,8)}`;
+      if (global.serverLog) {
+        global.serverLog(`⚠️ [Payments] Razorpay Account creation failed: ${errMsg}`);
+        global.serverLog(`ℹ️ [Payments] ${isLive ? 'LIVE' : 'TEST'} MODE: Falling back to simulated ID ${accountId} for demo flow.`);
+      }
     }
 
     // Update profiling data in Supabase (upsert)
@@ -118,6 +129,11 @@ router.post('/razorpay/create-order/:orderId', async (req, res) => {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
+    // Ownership check: Only the retailer who placed the order can pay for it
+    if (req.user.id !== order.retailer_id) {
+      return res.status(403).json({ success: false, error: 'Unauthorized: You cannot pay for an order you did not place.' });
+    }
+
 
     const options = {
       amount: Math.round(order.total_price * 100), 
@@ -148,6 +164,19 @@ router.post('/razorpay/create-order/:orderId', async (req, res) => {
 router.post('/confirm/:orderId', async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    // 1. Fetch order to verify ownership
+    const { data: order } = await supabase.safeQuery(() => 
+      supabase.from('orders').select('*').eq('id', req.params.orderId).single()
+    );
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    if (req.user.id !== order.retailer_id) {
+       return res.status(403).json({ success: false, error: 'Unauthorized confirmation attempt' });
+    }
 
     // Verify Signature
     const body = razorpay_order_id + "|" + razorpay_payment_id;

@@ -202,24 +202,29 @@ const OrderDetail = () => {
   const totalAmount = order.total_price || (order.quantity_kg * order.price_per_kg) || 0;
 
   return (
-    <div className="container mx-auto py-8 px-4 pb-32">
+    <div className="container mx-auto py-12 px-4 pb-32 relative">
+      <div className="hero-blob w-[500px] h-[500px] bg-primary-light -top-48 -left-48"></div>
+      <div className="hero-blob w-[400px] h-[400px] bg-accent -top-24 -right-24 opacity-10"></div>
+
       {/* Header & Navigation */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-        <div className="space-y-2">
-          <Link to="/orders" className="inline-flex items-center gap-2 text-primary font-black hover:underline uppercase text-[10px] tracking-widest mb-2 opacity-60">
-            <ArrowLeft className="w-3 h-3" /> {t('back_to_orders') || 'Back to Orders'}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
+        <div className="space-y-3">
+          <Link to="/orders" className="inline-flex items-center gap-2 text-primary font-black hover:underline uppercase text-[10px] tracking-widest opacity-60 group">
+            <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" /> {t('back_to_orders')}
           </Link>
-          <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-heading font-black text-primary-dark uppercase tracking-tighter">
+          <div className="flex flex-wrap items-center gap-4">
+            <h1 className="text-4xl md:text-6xl font-black text-primary-dark uppercase tracking-tight leading-none">
               {t(`data.${order.crop_name}`) !== `data.${order.crop_name}` ? t(`data.${order.crop_name}`) : order.crop_name}
             </h1>
-            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-sm border-2 ${getStatusColor(order.status)}`}>
+            <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md border-2 ${getStatusColor(order.status)}`}>
               {t(`status_${order.status}`) || order.status}
-            </span>
+            </div>
           </div>
-          <p className="text-text-muted flex items-center gap-2 text-sm font-bold opacity-60">
-            <Clock className="w-3.5 h-3.5" /> Order ID: #{(order.id || '').slice(-12).toUpperCase()}
-          </p>
+          <div className="flex items-center gap-4 text-text-muted text-xs font-bold opacity-60 uppercase tracking-widest">
+            <span className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> Ordered {new Date(order.created_at).toLocaleDateString()}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+            <span>ID: #{(order.id || '').slice(-8).toUpperCase()}</span>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -290,22 +295,21 @@ const OrderDetail = () => {
         {/* Left Column - Details & Logistics */}
         <div className="lg:col-span-2 space-y-8">
           
-          {/* Summary Cards Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
               { label: 'Unit Price', value: `₹${order.price_per_kg}/kg`, icon: TrendingUp },
               { label: 'Quantity', value: `${order.quantity_kg} kg`, icon: Package },
               { label: 'Total Value', value: `₹${totalAmount.toLocaleString()}`, icon: CreditCard, primary: true }
             ].map((stat, i) => (
-              <div key={i} className={`card p-6 border-b-8 ${stat.primary ? 'bg-primary-dark text-white border-accent' : 'bg-white border-primary/20'}`}>
-                <div className="flex justify-between items-start mb-4">
-                  <div className={`p-2 rounded-xl ${stat.primary ? 'bg-white/10' : 'bg-primary/5 text-primary'}`}>
-                    <stat.icon className="w-5 h-5" />
+              <div key={i} className={`card-premium group !p-8 ${stat.primary ? '!bg-primary-dark !text-white border-none' : 'bg-white'}`}>
+                <div className="flex justify-between items-start mb-6">
+                  <div className={`p-3 rounded-2xl ${stat.primary ? 'bg-white/10 text-accent' : 'bg-primary/5 text-primary'}`}>
+                    <stat.icon className="w-6 h-6" />
                   </div>
-                  <span className={`text-[9px] font-black uppercase tracking-widest ${stat.primary ? 'opacity-40' : 'opacity-20'}`}>Metric</span>
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${stat.primary ? 'opacity-40' : 'opacity-20'}`}>Metric</span>
                 </div>
-                <div className={`text-2xl font-black ${stat.primary ? 'text-accent' : 'text-primary-dark'}`}>{stat.value}</div>
-                <div className={`text-[10px] font-black uppercase tracking-wider mt-1 ${stat.primary ? 'opacity-60' : 'opacity-30'}`}>{stat.label}</div>
+                <div className={`text-4xl font-black tracking-tight ${stat.primary ? 'text-accent' : 'text-primary-dark'}`}>{stat.value}</div>
+                <div className={`text-[10px] font-black uppercase tracking-[0.2em] mt-2 ${stat.primary ? 'opacity-60' : 'opacity-30'}`}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -412,27 +416,35 @@ const OrderDetail = () => {
             </div>
           </div>
 
-          {/* Journey Progress (Mini Timeline) Card */}
-          <div className="card p-8 bg-white border-l-8 border-primary rounded-[40px] shadow-soft">
-            <h3 className="text-xl font-black text-primary-dark uppercase tracking-tight mb-8">Journey Progress</h3>
+          {/* Journey Progress Card */}
+          <div className="glass-card !p-10 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32"></div>
+            <h3 className="text-2xl font-black text-primary-dark uppercase tracking-tight mb-10 flex items-center gap-4">
+              <span className="w-8 h-1 bg-primary rounded-full"></span>
+              Timeline
+            </h3>
             <div className="relative">
-              <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-primary/10"></div>
-              <div className="space-y-10">
+              <div className="absolute left-[19px] top-4 bottom-4 w-1 bg-slate-100 rounded-full"></div>
+              <div className="space-y-12">
                 {steps.map((step, idx) => {
                   const isDone = idx <= currentIdx;
                   const isActive = idx === currentIdx;
                   return (
-                    <div key={step.id} className={`relative flex items-start gap-6 transition-all duration-700 ${isDone ? 'opacity-100 translate-x-0' : 'opacity-30 -translate-x-2 grayscale'}`}>
-                      <div className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-black text-xs z-10 transition-all duration-500 ${isDone ? 'bg-primary text-white shadow-hard scale-110' : 'bg-slate-100 text-slate-400 border border-slate-200'} ${isActive ? 'ring-4 ring-primary/20' : ''}`}>
-                        {isDone ? <CheckCircle className="w-5 h-5" /> : idx + 1}
+                    <div key={step.id} className={`relative flex items-start gap-8 transition-all duration-700 ${isDone ? 'opacity-100 translate-x-0' : 'opacity-30 -translate-x-2'}`}>
+                      <div className={`w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center font-black text-xs z-10 transition-all duration-500 ${isDone ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-110' : 'bg-slate-50 text-slate-400 border-2 border-slate-100'} ${isActive ? 'outline outline-offset-4 outline-primary/20 bg-primary-dark' : ''}`}>
+                        {isDone ? <CheckCircle className="w-6 h-6" /> : idx + 1}
                       </div>
-                      <div className="flex-1 -mt-0.5">
-                        <div className="flex justify-between items-center group">
-                          <h4 className={`font-black uppercase tracking-wide text-sm ${isDone ? 'text-primary-dark' : 'text-slate-400'}`}>{step.label}</h4>
-                          {isActive && <span className="inline-block w-2 h-2 rounded-full bg-accent animate-ping"></span>}
+                      <div className="flex-1 -mt-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className={`text-lg font-black uppercase tracking-tight ${isDone ? 'text-primary-dark' : 'text-slate-400'}`}>{step.label}</h4>
+                          {isActive && (
+                            <span className="px-3 py-1 bg-accent/10 border border-accent/20 rounded-full text-[8px] font-black text-accent uppercase tracking-widest animate-pulse">
+                               Current Stage
+                            </span>
+                          )}
                         </div>
-                        <p className={`text-[10px] font-bold leading-tight mt-1 ${isDone ? 'text-slate-500' : 'text-slate-300'}`}>{step.desc}</p>
-                        {isDone && <div className="text-[8px] font-black uppercase text-primary tracking-widest mt-2 flex items-center gap-1 opacity-60"><CheckCircle className="w-2 h-2" /> Verified</div>}
+                        <p className={`text-xs font-bold mt-1 max-w-sm ${isDone ? 'text-text-muted' : 'text-slate-300'}`}>{step.desc}</p>
+                        {isDone && <span className="text-[10px] font-black uppercase text-primary tracking-widest mt-2 flex items-center gap-1.5 opacity-60"><ShieldCheck className="w-3 h-3" /> Blockchain Verified</span>}
                       </div>
                     </div>
                   );

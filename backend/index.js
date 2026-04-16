@@ -38,20 +38,50 @@ const otpRouter = require('./routes/otp');
 const notificationsRouter = require('./routes/notifications');
 const authMiddleware = require('./middleware/authMiddleware');
 
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
 const app = express();
 const PORT = process.env.PORT || 3002;
 
+// 1. Basic Security Headers (Helmet)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: false, // Disabled for now to allow Razorpay inline scripts if needed
+}));
+
+// 2. CORS - Must be BEFORE rate limiters to ensure headers are present on all responses
 app.use(cors({
   origin: [
     'https://agri-mitra-alpha.vercel.app',
     'http://localhost:5173',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://127.0.0.1:5173'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['x-rtb-fingerprint-id', 'request-id']
 }));
+
+// 3. Global Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Increased to 1000 for development stability
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests from this IP, please try again after 15 minutes' }
+});
+app.use('/api/', limiter);
+
+// 3. Sensitive Endpoint Rate Limiting (Payouts/Verification)
+const sensitiveLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, 
+  message: { success: false, error: 'Too many sensitive requests. Locked for 1 hour for security.' }
+});
+app.use('/api/payments/razorpay/onboard-farmer', sensitiveLimiter);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 

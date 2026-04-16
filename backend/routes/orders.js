@@ -281,12 +281,41 @@ router.patch('/:id', async (req, res) => {
 
     // Handle Secure Delivery Handshake (Escrow Release)
     if (updates.status === 'delivered') {
-       // 1. Verify OTP
-       if (!req.body.otp || req.body.otp !== existingOrder.delivery_otp) {
-          return res.status(400).json({ success: false, error: 'Invalid delivery verification code' });
+       // 0. Check for Lockout
+       if (existingOrder.locked_until && new Date(existingOrder.locked_until) > new Date()) {
+         const remaining = Math.ceil((new Date(existingOrder.locked_until) - new Date()) / 60000);
+         return res.status(423).json({ 
+           success: false, 
+           error: `Verification locked due to too many failed attempts. Try again in ${remaining} minutes.` 
+         });
        }
 
-       // 2. Fetch Farmer's Payout Account
+       // 1. Verify OTP
+       if (!req.body.otp || req.body.otp !== existingOrder.delivery_otp) {
+          const newAttempts = (existingOrder.verification_attempts || 0) + 1;
+          const updatesOnFail = { verification_attempts: newAttempts };
+          
+          if (newAttempts >= 5) {
+            updatesOnFail.locked_until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+          }
+
+          await supabase.safeQuery(() => 
+            supabase.from('orders').update(updatesOnFail).eq('id', req.params.id)
+          );
+
+          return res.status(400).json({ 
+            success: false, 
+            error: newAttempts >= 5 
+              ? 'Too many failed attempts. Verification locked for 15 minutes.' 
+              : `Invalid verification code. ${5 - newAttempts} attempts remaining.` 
+          });
+       }
+
+       // 2. Successful OTP - Reset attempts
+       updates.verification_attempts = 0;
+       updates.locked_until = null;
+
+       // 3. Fetch Farmer's Payout Account
        const { data: farmerProf } = await supabase.safeQuery(() => 
          supabase
            .from('farmer_profiles')

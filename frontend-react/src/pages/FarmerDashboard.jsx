@@ -21,6 +21,7 @@ const FarmerDashboard = () => {
 
   // Payout / Onboarding state
   const [isFarmerOnboarded, setIsFarmerOnboarded] = useState(false);
+  const [isSimulatedAccount, setIsSimulatedAccount] = useState(false);
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [bankData, setBankData] = useState({ bank_account: '', ifsc: '', name: profile.full_name || '' });
   const [payoutLoading, setPayoutLoading] = useState(false);
@@ -64,6 +65,7 @@ const FarmerDashboard = () => {
     const statusRes = await api.getOnboardStatus(profile.id);
     if (statusRes.success && statusRes.onboarded) {
       setIsFarmerOnboarded(true);
+      setIsSimulatedAccount(statusRes.is_simulated);
       if (statusRes.data) {
         setBankData({
           bank_account: statusRes.data.bank_account_number || '',
@@ -260,251 +262,273 @@ const FarmerDashboard = () => {
   if (loading) return <div className="p-20 text-center text-primary font-bold">{t('analyzing_data') || 'Loading Dashboard...'}</div>;
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-heading font-black text-primary-dark uppercase tracking-tight flex items-center gap-3">
-            <LayoutDashboard className="w-8 h-8 text-primary" /> {t('dashboard_title')}
+    <div className="container mx-auto py-12 px-4 relative">
+      {/* Decorative Background Elements */}
+      <div className="hero-blob w-[500px] h-[500px] bg-primary -top-48 -left-48"></div>
+      <div className="hero-blob w-[400px] h-[400px] bg-accent -bottom-48 -right-48 opacity-10"></div>
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <div className="space-y-1">
+          <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tight leading-tight">
+            Hello, <span className="text-gradient">{profile.full_name?.split(' ')[0] || 'Farmer'}</span>
           </h1>
-          <p className="text-text-muted">{t('dashboard_subtitle')}</p>
+          <p className="text-text-muted font-medium text-lg">{t('dashboard_subtitle')}</p>
         </div>
-        <div className="flex gap-2">
-          <Link to="/ai-predictor" className="btn btn-outline border-primary  font-white gap-2 font-black uppercase text-xs tracking-widest">
-            <TrendingUp className="w-4 h-4" /> {t('ai_predictor_btn')}
+        <div className="flex flex-wrap gap-3">
+          <Link to="/ai-predictor" className="btn btn-outline border-primary/20 bg-white/50 backdrop-blur-sm group px-8">
+            <TrendingUp className="w-5 h-5 group-hover:scale-110 transition-transform" /> 
+            <span className="font-bold">{t('ai_predictor_btn')}</span>
           </Link>
-          <Link to="/add-crop" className="btn btn-primary gap-2 font-black uppercase text-xs tracking-widest shadow-hard">
-            <Plus className="w-4 h-4" /> {t('add_crop_btn')}
+          <Link to="/add-crop" className="btn btn-primary px-8 shadow-xl shadow-primary/20">
+            <Plus className="w-5 h-5" /> 
+            <span className="font-bold">{t('add_crop_btn')}</span>
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-12">
-        <div className="card bg-primary text-white p-6 shadow-hard relative overflow-hidden">
-          <Package className="w-16 h-16 absolute -right-2 -bottom-2 opacity-10" />
-          <h3 className="text-xs font-black uppercase tracking-widest opacity-70 mb-1 text-white">{t('active_listings')}</h3>
-          <div className="text-4xl font-black">{myCrops.filter(c => c.is_available).length}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="card-premium group">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+              <Package className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-black text-success bg-success/10 px-2 py-1 rounded-full">+12%</span>
+          </div>
+          <h3 className="text-xs font-black uppercase tracking-widest text-text-muted mb-1">{t('active_listings')}</h3>
+          <div className="text-4xl font-black text-primary-dark">{myCrops.filter(c => c.is_available).length}</div>
         </div>
-        <div className="card bg-accent text-primary-dark p-6 shadow-hard relative overflow-hidden">
-          <Clock className="w-16 h-16 absolute -right-2 -bottom-2 opacity-10" />
-          <h3 className="text-xs font-black uppercase tracking-widest opacity-70 mb-1">{t('pending_orders')}</h3>
-          <div className="text-4xl font-black">{pendingCount}</div>
+
+        <div className="card-premium group">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300">
+              <Clock className="w-6 h-6" />
+            </div>
+            {pendingCount > 0 && <span className="flex h-3 w-3 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
+            </span>}
+          </div>
+          <h3 className="text-xs font-black uppercase tracking-widest text-text-muted mb-1">{t('pending_orders')}</h3>
+          <div className="text-4xl font-black text-primary-dark">{pendingCount}</div>
         </div>
-        <div className="card bg-white p-6 border-2 border-primary/10 flex flex-col justify-center">
-           <Link to="/orders" className="flex items-center justify-between group">
-              <span className="font-black uppercase tracking-widest text-sm text-primary-dark">{t('view_orders_btn')}</span>
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
-                <Plus className="w-5 h-5 rotate-45" />
+
+        <div className="card-premium lg:col-span-2 bg-primary-dark !text-white border-none group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="relative z-10 flex flex-col md:flex-row h-full justify-between gap-6">
+            <div className="space-y-1">
+              <h3 className="text-xs font-black uppercase tracking-widest opacity-60">{t('earnings_summary')}</h3>
+              <div className="text-4xl md:text-5xl font-black text-accent flex items-baseline gap-2">
+                <span className="text-2xl opacity-60">₹</span>
+                {stats.netEarnings.toLocaleString()}
               </div>
-           </Link>
+              <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{t('settlement_desc')}</p>
+            </div>
+            <div className="flex flex-col gap-3 justify-center min-w-[200px]">
+               <div className="flex items-center justify-between text-sm bg-white/5 p-3 rounded-xl border border-white/10">
+                  <span className="opacity-60 font-bold">{t('pending_payouts')}</span>
+                  <span className="font-black text-accent">₹{stats.pendingPayouts.toLocaleString()}</span>
+               </div>
+               <div className="flex items-center justify-between text-sm bg-white/5 p-3 rounded-xl border border-white/10">
+                  <span className="opacity-60 font-bold">{t('potential_revenue')}</span>
+                  <span className="font-black text-primary-light">₹{stats.potentialRevenue.toLocaleString()}</span>
+               </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        <div className="lg:col-span-2 card bg-bg border-2 border-primary/5 p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 md:gap-8 shadow-soft">
-           <div className="flex-1 w-full space-y-2 text-center md:text-left">
-             <h3 className="text-sm font-black uppercase tracking-widest text-text-muted flex items-center justify-center md:justify-start gap-2">
-               <TrendingUp className="w-4 h-4 text-success" /> {t('earnings_summary')}
-             </h3>
-             <div className="text-4xl md:text-5xl font-black text-primary-dark">₹{stats.netEarnings.toLocaleString()}</div>
-             <p className="text-xs font-bold text-text-muted">{t('settlement_desc')}</p>
-           </div>
-           
-           <div className="w-full md:w-auto flex flex-col sm:flex-row md:flex-col gap-4">
-             <div className="flex-1 p-4 rounded-xl bg-white border border-primary/10 flex items-center justify-between min-w-[180px]">
-               <span className="text-[10px] font-black uppercase text-text-muted">{t('pending_payouts')}</span>
-               <span className="font-black text-info text-lg">₹{stats.pendingPayouts.toLocaleString()}</span>
-             </div>
-             <div className="flex-1 p-4 rounded-xl bg-white border border-primary/10 flex items-center justify-between min-w-[180px]">
-               <span className="text-[10px] font-black uppercase text-text-muted">{t('potential_revenue')}</span>
-               <span className="font-black text-primary text-lg">₹{stats.potentialRevenue.toLocaleString()}</span>
-             </div>
-           </div>
-        </div>
-        
-        <Link to="/orders" className="card bg-primary-dark text-white p-8 flex flex-col justify-between hover:scale-[1.02] transition-transform shadow-hard group">
-           <div className="space-y-2">
-             <h3 className="text-sm font-black uppercase tracking-widest opacity-60">{t('latest_activity')}</h3>
-             <p className="text-xs opacity-80 leading-relaxed">{t('check_orders_desc')}</p>
-           </div>
-           <div className="flex items-center gap-2 font-black text-accent uppercase tracking-widest mt-6 group-hover:translate-x-2 transition-transform">
-             {t('manage_orders')} <Plus className="w-5 h-5 rotate-45" />
-           </div>
-        </Link>
       </div>
 
       {/* Persistence Payout Status Row */}
-      <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-         <div className={`card ${isFarmerOnboarded ? 'bg-success/5 border-success/20' : 'bg-info/5 border-info/20'} p-6 flex items-center justify-between group`}>
-            <div className="flex items-center gap-4">
-               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${isFarmerOnboarded ? 'bg-success' : 'bg-info animate-pulse'}`}>
-                  <CreditCard className="w-6 h-6" />
+      <div className="mb-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+         <div className={`glass-card ${isFarmerOnboarded && !isSimulatedAccount ? 'border-success/30' : isSimulatedAccount ? 'border-accent/30' : 'border-info/30'} !p-8 flex items-center justify-between group overflow-hidden relative`}>
+            <div className={`absolute top-0 left-0 w-2 h-full ${isFarmerOnboarded && !isSimulatedAccount ? 'bg-success' : isSimulatedAccount ? 'bg-accent animate-pulse' : 'bg-info'}`}></div>
+            <div className="flex items-center gap-6">
+               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${isFarmerOnboarded && !isSimulatedAccount ? 'bg-success shadow-success/20' : isSimulatedAccount ? 'bg-accent shadow-accent/20' : 'bg-info shadow-info/20 animate-pulse'}`}>
+                  <CreditCard className="w-7 h-7" />
                </div>
                <div>
-                  <h3 className="text-lg font-black text-primary-dark uppercase">{isFarmerOnboarded ? 'Payouts Active' : 'Enable Direct Payouts'}</h3>
-                  <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
-                     {isFarmerOnboarded ? `Linked: Account ending in ...${bankData.bank_account.slice(-4)}` : 'Link bank account for automated fund release'}
+                  <h3 className="text-xl font-black text-primary-dark uppercase tracking-tight">
+                    {isFarmerOnboarded ? (isSimulatedAccount ? 'Demo Mode (Upgrade Live)' : 'Payouts Secured') : 'Enable Direct Payouts'}
+                  </h3>
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-wider mt-1">
+                     {isFarmerOnboarded 
+                       ? (isSimulatedAccount ? 'Real payouts are currently disabled' : `Linked: Account ending in ...${bankData.bank_account.slice(-4)}`) 
+                       : 'Link bank account for automated fund release'}
                   </p>
                </div>
             </div>
             <button 
               onClick={() => setShowPayoutModal(true)}
-              className={`btn btn-sm ${isFarmerOnboarded ? 'btn-outline border-success text-success' : 'btn-primary'} px-6 font-black uppercase text-[10px] tracking-widest`}
+              className={`btn ${isFarmerOnboarded ? (isSimulatedAccount ? 'btn-accent animate-bounce' : 'btn-outline border-success/30 text-success bg-success/5') : 'btn-primary'} px-8 font-black uppercase text-xs tracking-widest z-10`}
             >
-              {isFarmerOnboarded ? 'Manage Account' : 'Setup Now'}
+              {isFarmerOnboarded ? (isSimulatedAccount ? 'UPGRADE NOW' : 'Manage') : 'Setup Now'}
             </button>
          </div>
 
-         <div className="card bg-primary-dark text-white p-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
-                  <ShieldCheck className="w-6 h-6 text-accent" />
+         <div className="glass-card-dark !p-8 flex items-center justify-between group overflow-hidden relative">
+            <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-accent opacity-5 rounded-full group-hover:scale-125 transition-transform duration-700"></div>
+            <div className="flex items-center gap-6 relative z-10">
+               <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 shadow-xl">
+                  <ShieldCheck className="w-7 h-7 text-accent" />
                </div>
                <div>
-                  <h3 className="text-lg font-black uppercase text-accent">Escrow Protection</h3>
-                  <p className="text-[10px] font-bold opacity-60 uppercase tracking-wider">Payments are held securely until verification</p>
+                  <h3 className="text-xl font-black uppercase text-accent tracking-tight">Escrow Protected</h3>
+                  <p className="text-xs font-bold opacity-60 uppercase tracking-wider mt-1">Funds are held securely until verification</p>
                </div>
             </div>
-            <AlertCircle className="w-6 h-6 opacity-20" />
+            <Link to="/orders" className="text-white/40 hover:text-white transition-colors">
+              <Plus className="w-8 h-8 rotate-45" />
+            </Link>
          </div>
       </div>
 
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-heading font-black text-primary-dark uppercase tracking-wide">{t('my_listings')}</h2>
+      <div className="mb-8 flex items-center justify-between">
+        <h2 className="text-3xl font-black text-primary-dark uppercase tracking-tight flex items-center gap-4">
+          <span className="w-12 h-1 bg-primary rounded-full"></span>
+          {t('my_listings')}
+        </h2>
       </div>
 
-      {(() => {
-        // Show all crops that belong to the farmer, but sort by status
-        const myCropsList = [...myCrops].sort((a, b) => b.is_available - a.is_available);
-        
-        return myCropsList.length === 0 ? (
-          <div className="card text-center py-16 bg-white border-dashed border-2 border-primary/20">
-            <AlertCircle className="w-12 h-12 text-text-muted/30 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-text-muted mb-4">{t('no_orders_yet') === 'No orders yet' ? 'No active crops listed' : t('no_orders_yet')}</h3>
-            <Link to="/add-crop" className="btn btn-primary px-8 rounded-full font-black uppercase text-xs tracking-widest">{t('add_new')}</Link>
+      {myCrops.length === 0 ? (
+        <div className="card-premium text-center py-24 bg-white/50 backdrop-blur-sm border-dashed">
+          <div className="w-20 h-20 bg-bg rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-10 h-10 text-text-muted/30" />
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {myCropsList.map(crop => (
-            <div key={crop._id || crop.id} className="card group">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex gap-4">
+          <h3 className="text-2xl font-black text-text-muted mb-6">{t('no_orders_yet') === 'No orders yet' ? 'No crops listed' : t('no_orders_yet')}</h3>
+          <Link to="/add-crop" className="btn btn-primary px-12 rounded-full font-black uppercase text-xs tracking-widest shadow-xl shadow-primary/20">{t('add_new')}</Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {myCrops.map(crop => (
+            <div key={crop._id} className="card-premium group !p-0">
+               <div className="relative h-48 overflow-hidden">
                   {crop.image_url ? (
-                    <img src={crop.image_url} className="w-16 h-16 rounded-lg object-cover border border-primary/10 shadow-soft" />
+                    <img src={crop.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={crop.crop_name} />
                   ) : (
-                    <div className="w-16 h-16 rounded-lg bg-bg border border-dashed border-primary/20 flex items-center justify-center text-2xl">🌱</div>
+                    <div className="w-full h-full bg-bg flex items-center justify-center text-5xl">🌱</div>
                   )}
-                  <div>
-                    <h3 className="text-xl font-black text-primary-dark">{(crop.crop_name && t(`data.${crop.crop_name}`) !== `data.${crop.crop_name}`) ? t(`data.${crop.crop_name}`) : crop.crop_name}</h3>
-                    <div className="text-xs font-bold text-text-muted uppercase tracking-widest">{crop.quantity_kg || crop.quantity || 0} {(crop.unit && t(`data.${crop.unit}`)) || crop.unit || 'kg'} · ₹{crop.price_per_kg || crop.price_per_unit || 0}/{(crop.unit && t(`data.${crop.unit}`)) || crop.unit || 'kg'}</div>
+                  <div className="absolute top-4 right-4">
+                    <span className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md border ${crop.is_available ? 'bg-success/80 text-white border-success/20' : 'bg-danger/80 text-white border-danger/20'}`}>
+                      {crop.is_available ? t('available') : t('out_of_stock')}
+                    </span>
                   </div>
-                </div>
-                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter ${crop.is_available ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'}`}>
-                  {crop.is_available ? t('available') : t('out_of_stock')}
-                </span>
-              </div>
-              
-              <div className="flex gap-2 mt-6 pt-4 border-t border-primary/5">
-                <button onClick={() => handleEditOpen(crop)} className="flex-1 btn btn-outline btn-sm gap-2 text-[10px] font-black uppercase tracking-widest"><Edit2 className="w-3 h-3" /> {t('edit_listing')}</button>
-                <button onClick={() => handleDelete(crop._id || crop.id)} className="btn btn-outline btn-sm text-danger hover:bg-danger hover:text-white border-danger/20"><Trash2 className="w-4 h-4" /></button>
-              </div>
+               </div>
+               <div className="p-6 space-y-4">
+                  <div>
+                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">{(crop.crop_name && t(`data.${crop.crop_name}`) !== `data.${crop.crop_name}`) ? t(`data.${crop.crop_name}`) : crop.crop_name}</h3>
+                    <div className="flex items-center gap-2 mt-2">
+                       <span className="text-lg font-black text-primary">₹{crop.price_per_unit || 0}</span>
+                       <span className="text-xs font-bold text-text-muted uppercase tracking-widest">/ {(crop.unit && t(`data.${crop.unit}`)) || crop.unit || 'kg'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs font-bold text-text-muted uppercase tracking-widest pt-4 border-t border-slate-50">
+                     <span>Stock: {crop.quantity || 0} {crop.unit || 'kg'}</span>
+                     <div className="flex gap-2">
+                        <button onClick={() => handleEditOpen(crop)} className="w-10 h-10 rounded-xl bg-bg flex items-center justify-center text-primary-light hover:bg-primary-light hover:text-white transition-all duration-300">
+                           <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(crop._id)} className="w-10 h-10 rounded-xl bg-bg flex items-center justify-center text-danger hover:bg-danger hover:text-white transition-all duration-300">
+                           <Trash2 className="w-4 h-4" />
+                        </button>
+                     </div>
+                  </div>
+               </div>
             </div>
           ))}
         </div>
-      );
-      })()}
+      )}
 
-      {/* ====== SPOILAGE RESCUE SECTION ====== */}
-      <div className="mt-12 mb-4">
-        <div className="flex items-center justify-between mb-6">
+      <div className="mt-20 mb-12">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
           <div>
-            <h2 className="text-2xl font-heading font-black text-red-700 uppercase tracking-wide flex items-center gap-2">
-              <AlertTriangle className="w-6 h-6" /> {t('spoilage_rescue')}
+            <h2 className="text-3xl font-black text-danger uppercase tracking-tight flex items-center gap-4">
+              <span className="w-12 h-1 bg-danger rounded-full"></span>
+              {t('spoilage_rescue')}
             </h2>
-            <p className="text-sm text-gray-500 font-medium mt-1">{t('spoilage_rescue_desc')}</p>
+            <p className="text-text-muted font-medium mt-2">{t('spoilage_rescue_desc')}</p>
           </div>
           <button
             onClick={() => { setRescueModal(true); setRescueErrors({}); }}
-            className="btn gap-2 font-black uppercase text-xs tracking-widest shadow-hard text-white"
-            style={{ backgroundColor: '#dc2626' }}
+            className="btn bg-danger text-white px-8 py-4 shadow-xl shadow-danger/20 group"
           >
-            <AlertTriangle className="w-4 h-4" /> {t('report_at_risk')}
+            <AlertTriangle className="w-5 h-5 group-hover:scale-110 transition-transform" /> 
+            {t('report_at_risk')}
           </button>
         </div>
 
         {rescueSuccess && (
-          <div className="mb-5 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-800 font-bold text-sm animate-in slide-in-from-top-2">
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" /> {t('rescue_msg')}
+          <div className="mb-8 p-6 bg-success/5 border border-success/20 rounded-3xl flex items-center gap-4 text-success font-bold animate-in slide-in-from-top-4">
+            <div className="w-10 h-10 bg-success text-white rounded-full flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-6 h-6" />
+            </div>
+            {t('rescue_msg')}
           </div>
         )}
 
         {rescueListings.length === 0 ? (
-          <div className="card text-center py-12 border-2 border-dashed border-red-200 bg-red-50">
-            <AlertTriangle className="w-10 h-10 text-red-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-gray-500">{t('no_orders_yet')}</h3>
-            <p className="text-sm text-gray-400 mt-1">{t('spoilage_rescue_desc')}</p>
+          <div className="card-premium text-center py-20 border-dashed border-danger/20 bg-danger/[0.02]">
+            <div className="w-16 h-16 bg-danger/5 text-danger rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8 opacity-40" />
+            </div>
+            <h3 className="text-xl font-bold text-text-muted">{t('no_orders_yet')}</h3>
+            <p className="text-sm text-text-muted/60 mt-1 max-w-xs mx-auto">{t('spoilage_rescue_desc')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {rescueListings.map(item => (
               <div key={item.id}
-                className={`card border-l-4 ${
-                  item.status === 'sold' ? 'border-l-gray-400 opacity-60' :
-                  item.shelf_life_hours <= 12 ? 'border-l-red-600' :
-                  item.shelf_life_hours <= 24 ? 'border-l-orange-500' : 'border-l-yellow-500'
+                className={`card-premium !p-0 border-l-8 ${
+                  item.status === 'sold' ? 'border-l-slate-300 opacity-60' :
+                  item.shelf_life_hours <= 12 ? 'border-l-danger' :
+                  item.shelf_life_hours <= 24 ? 'border-l-accent' : 'border-l-warning'
                 }`}
               >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="text-lg font-black text-green-900">{(item.crop_name && t(`data.${item.crop_name}`) !== `data.${item.crop_name}`) ? t(`data.${item.crop_name}`) : item.crop_name}</h3>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.quantity_kg} {t('quantity_label')}</div>
+                <div className="p-6 space-y-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-xl font-black text-primary-dark">{(item.crop_name && t(`data.${item.crop_name}`) !== `data.${item.crop_name}`) ? t(`data.${item.crop_name}`) : item.crop_name}</h3>
+                      <div className="badge-premium bg-slate-100 border-slate-200 text-text-muted mt-2">{item.quantity_kg} kg {t('quantity_label')}</div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                      item.status === 'sold' ? 'bg-slate-100 text-slate-500' :
+                      item.status === 'expired' ? 'bg-slate-200 text-slate-600' :
+                      'bg-danger/10 text-danger'
+                    }`}>
+                      {item.status === 'sold' ? '✓ ' + t('done') : item.status === 'expired' ? 'Expired' : t('active')}
+                    </span>
                   </div>
-                  <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter ${
-                    item.status === 'sold' ? 'bg-gray-100 text-gray-500' :
-                    item.status === 'expired' ? 'bg-gray-200 text-gray-600' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {item.status === 'sold' ? '✓ ' + t('done') : item.status === 'expired' ? 'Expired' : t('available')}
-                  </span>
-                </div>
 
-                <div className="space-y-1 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 font-bold">{t('rescue_price')}</span>
-                    <span className="font-black text-green-800">₹{item.discounted_price_per_kg}/kg</span>
+                  <div className="grid grid-cols-2 gap-4 bg-bg p-4 rounded-2xl">
+                    <div className="space-y-1 text-center border-r border-slate-200">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-text-muted">{t('rescue_price')}</div>
+                      <div className="text-lg font-black text-success">₹{item.discounted_price_per_kg}</div>
+                    </div>
+                    <div className="space-y-1 text-center">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-text-muted">{t('shelf_life')}</div>
+                      <div className={`text-lg font-black ${
+                        item.shelf_life_hours <= 12 ? 'text-danger' :
+                        item.shelf_life_hours <= 24 ? 'text-accent' : 'text-warning'
+                      }`}>{item.shelf_life_hours}h</div>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 font-bold">{t('discount')}</span>
-                    <span className="font-black text-red-600">{item.discount_percent}% OFF</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400 font-bold">{t('original')}</span>
-                    <span className="text-gray-400 line-through font-bold">₹{item.original_price_per_kg}/kg</span>
-                  </div>
-                  <div className="flex justify-between text-sm pt-1 border-t border-gray-100">
-                    <span className="text-gray-500 font-bold flex items-center gap-1"><Clock className="w-3 h-3" /> {t('shelf_life')}</span>
-                    <span className={`font-black ${
-                      item.shelf_life_hours <= 12 ? 'text-red-600' :
-                      item.shelf_life_hours <= 24 ? 'text-orange-500' : 'text-yellow-600'
-                    }`}>{item.shelf_life_hours}h {t('remaining')}</span>
-                  </div>
-                </div>
 
-                {item.status === 'active' && (
-                  <div className="flex gap-2 pt-3 border-t border-gray-100">
-                    <button
-                      onClick={() => handleRescueMarkSold(item.id)}
-                      className="flex-1 btn btn-outline btn-sm text-[10px] font-black uppercase tracking-widest text-green-700 border-green-300 hover:bg-green-700 hover:text-white"
-                    >
-                      <CheckCircle className="w-3 h-3" /> {t('mark_sold')}
-                    </button>
-                    <button
-                      onClick={() => handleRescueDelete(item.id)}
-                      className="btn btn-outline btn-sm text-red-500 border-red-200 hover:bg-red-500 hover:text-white"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+                  {item.status === 'active' && (
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        onClick={() => handleRescueMarkSold(item.id)}
+                        className="flex-1 btn btn-outline !py-2 !px-0 bg-success/5 border-success/20 text-success hover:bg-success hover:text-white transition-all text-xs"
+                      >
+                        <CheckCircle className="w-3 h-3" /> {t('mark_sold')}
+                      </button>
+                      <button
+                        onClick={() => handleRescueDelete(item.id)}
+                        className="btn btn-outline !py-2 !px-3 border-danger/20 text-danger hover:bg-danger hover:text-white transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
